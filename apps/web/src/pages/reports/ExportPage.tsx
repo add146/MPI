@@ -1,163 +1,162 @@
 import { useState } from 'react';
-import { Download, FileSpreadsheet, FileText, Calendar, CheckCircle } from 'lucide-react';
+import { Download, Search, FileSpreadsheet, FileText, Calendar, Clock, CheckCircle } from 'lucide-react';
+import { formatCurrency } from '@/lib/utils';
 
 export default function ExportPage() {
-    const [selectedReport, setSelectedReport] = useState('');
-    const [format, setFormat] = useState('xlsx');
     const [dateFrom, setDateFrom] = useState('');
     const [dateTo, setDateTo] = useState('');
 
-    const reports = [
-        { id: 'sales', name: 'Laporan Penjualan', description: 'Data transaksi dan penjualan harian/bulanan' },
-        { id: 'inventory', name: 'Laporan Stok', description: 'Posisi stok produk dan bahan baku' },
-        { id: 'customers', name: 'Data Pelanggan', description: 'Daftar pelanggan dan poin mereka' },
-        { id: 'transactions', name: 'Riwayat Transaksi', description: 'Detail semua transaksi' },
-        { id: 'profit-loss', name: 'Laporan Laba Rugi', description: 'Ringkasan pendapatan dan pengeluaran' },
-        { id: 'hpp', name: 'Laporan HPP', description: 'Harga Pokok Produksi per produk' },
+    const exportOptions = [
+        { id: 'sales', name: 'Laporan Penjualan', icon: FileSpreadsheet, description: 'Data transaksi dan penjualan' },
+        { id: 'inventory', name: 'Stok & Inventory', icon: FileSpreadsheet, description: 'Data stok produk dan bahan' },
+        { id: 'profit-loss', name: 'Laba Rugi', icon: FileText, description: 'Laporan pendapatan dan biaya' },
+        { id: 'balance', name: 'Neraca', icon: FileText, description: 'Posisi keuangan' },
+        { id: 'customers', name: 'Data Pelanggan', icon: FileSpreadsheet, description: 'Daftar pelanggan dan transaksi' },
+        { id: 'products', name: 'Data Produk', icon: FileSpreadsheet, description: 'Katalog produk dan harga' },
     ];
 
     const recentExports = [
-        { name: 'Laporan Penjualan Jan 2024', format: 'xlsx', date: '2024-01-15 10:30', status: 'completed' },
-        { name: 'Data Pelanggan', format: 'csv', date: '2024-01-14 14:22', status: 'completed' },
-        { name: 'Stok Bahan Baku', format: 'xlsx', date: '2024-01-12 09:15', status: 'completed' },
+        { name: 'Penjualan Jan 2024.xlsx', date: '15 Jan 2024', size: '245 KB', status: 'completed' },
+        { name: 'Stok 31 Jan 2024.xlsx', date: '31 Jan 2024', size: '128 KB', status: 'completed' },
+        { name: 'Laba Rugi Q4 2023.xlsx', date: '01 Jan 2024', size: '89 KB', status: 'completed' },
     ];
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
             {/* Header */}
-            <div>
-                <h1 className="text-2xl font-bold text-gray-900">Export Data</h1>
-                <p className="text-gray-500">Unduh laporan dan data dalam format Excel atau CSV</p>
+            <div className="page-header">
+                <div>
+                    <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Export Data</h1>
+                    <p className="text-sm text-gray-500">Download laporan dalam format Excel/CSV</p>
+                </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Export Form */}
-                <div className="lg:col-span-2 space-y-6">
-                    {/* Select Report */}
-                    <div className="card">
-                        <div className="p-5 border-b border-gray-200">
-                            <h3 className="font-semibold text-gray-900">Pilih Laporan</h3>
-                        </div>
-                        <div className="p-5 grid grid-cols-1 md:grid-cols-2 gap-3">
-                            {reports.map((report) => (
-                                <label
-                                    key={report.id}
-                                    className={`card p-4 cursor-pointer border-2 transition-colors ${selectedReport === report.id
-                                            ? 'border-primary-500 bg-primary-50'
-                                            : 'border-gray-200 hover:border-gray-300'
-                                        }`}
-                                >
-                                    <input
-                                        type="radio"
-                                        name="report"
-                                        value={report.id}
-                                        checked={selectedReport === report.id}
-                                        onChange={(e) => setSelectedReport(e.target.value)}
-                                        className="sr-only"
-                                    />
-                                    <div className="flex items-start gap-3">
-                                        <FileSpreadsheet className={`h-5 w-5 ${selectedReport === report.id ? 'text-primary-600' : 'text-gray-400'
-                                            }`} />
-                                        <div>
-                                            <p className="font-medium text-gray-900">{report.name}</p>
-                                            <p className="text-sm text-gray-500">{report.description}</p>
-                                        </div>
-                                    </div>
-                                </label>
-                            ))}
-                        </div>
+            {/* Date Range */}
+            <div className="card p-4 sm:p-5">
+                <h3 className="font-medium text-gray-900 mb-3 flex items-center gap-2">
+                    <Calendar className="h-5 w-5 text-gray-400" />
+                    Periode Laporan
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                    <div>
+                        <label className="label">Dari Tanggal</label>
+                        <input
+                            type="date"
+                            value={dateFrom}
+                            onChange={(e) => setDateFrom(e.target.value)}
+                            className="input"
+                        />
                     </div>
-
-                    {/* Options */}
-                    <div className="card">
-                        <div className="p-5 border-b border-gray-200">
-                            <h3 className="font-semibold text-gray-900">Pengaturan Export</h3>
-                        </div>
-                        <div className="p-5 space-y-4">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <label className="label">Dari Tanggal</label>
-                                    <div className="relative">
-                                        <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                                        <input
-                                            type="date"
-                                            value={dateFrom}
-                                            onChange={(e) => setDateFrom(e.target.value)}
-                                            className="input pl-10"
-                                        />
-                                    </div>
-                                </div>
-                                <div>
-                                    <label className="label">Sampai Tanggal</label>
-                                    <div className="relative">
-                                        <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                                        <input
-                                            type="date"
-                                            value={dateTo}
-                                            onChange={(e) => setDateTo(e.target.value)}
-                                            className="input pl-10"
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-                            <div>
-                                <label className="label">Format File</label>
-                                <div className="flex gap-4">
-                                    <label className={`flex items-center gap-2 px-4 py-2 rounded-lg border-2 cursor-pointer ${format === 'xlsx' ? 'border-primary-500 bg-primary-50' : 'border-gray-200'
-                                        }`}>
-                                        <input
-                                            type="radio"
-                                            name="format"
-                                            value="xlsx"
-                                            checked={format === 'xlsx'}
-                                            onChange={(e) => setFormat(e.target.value)}
-                                            className="sr-only"
-                                        />
-                                        <FileSpreadsheet className="h-4 w-4 text-green-600" />
-                                        <span className="text-sm font-medium">Excel (.xlsx)</span>
-                                    </label>
-                                    <label className={`flex items-center gap-2 px-4 py-2 rounded-lg border-2 cursor-pointer ${format === 'csv' ? 'border-primary-500 bg-primary-50' : 'border-gray-200'
-                                        }`}>
-                                        <input
-                                            type="radio"
-                                            name="format"
-                                            value="csv"
-                                            checked={format === 'csv'}
-                                            onChange={(e) => setFormat(e.target.value)}
-                                            className="sr-only"
-                                        />
-                                        <FileText className="h-4 w-4 text-blue-600" />
-                                        <span className="text-sm font-medium">CSV (.csv)</span>
-                                    </label>
-                                </div>
-                            </div>
-                            <button className="btn-primary w-full" disabled={!selectedReport}>
-                                <Download className="h-4 w-4" />
-                                Export Laporan
-                            </button>
-                        </div>
+                    <div>
+                        <label className="label">Sampai Tanggal</label>
+                        <input
+                            type="date"
+                            value={dateTo}
+                            onChange={(e) => setDateTo(e.target.value)}
+                            className="input"
+                        />
                     </div>
                 </div>
+            </div>
 
-                {/* Recent Exports */}
-                <div className="card h-fit">
-                    <div className="p-5 border-b border-gray-200">
-                        <h3 className="font-semibold text-gray-900">Export Terakhir</h3>
-                    </div>
-                    <div className="p-5 space-y-3">
-                        {recentExports.map((exp, idx) => (
-                            <div key={idx} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-0">
-                                <div className="flex items-center gap-3">
-                                    <CheckCircle className="h-4 w-4 text-green-500" />
-                                    <div>
-                                        <p className="text-sm font-medium text-gray-900">{exp.name}</p>
-                                        <p className="text-xs text-gray-500">{exp.date}</p>
-                                    </div>
+            {/* Export Options */}
+            <div>
+                <h3 className="font-medium text-gray-900 mb-3">Pilih Jenis Laporan</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+                    {exportOptions.map((option) => (
+                        <div key={option.id} className="card p-4 hover:shadow-md transition-shadow cursor-pointer group">
+                            <div className="flex items-start gap-3">
+                                <div className="h-10 w-10 rounded-lg bg-primary-100 flex items-center justify-center flex-shrink-0">
+                                    <option.icon className="h-5 w-5 text-primary-600" />
                                 </div>
-                                <span className="badge bg-gray-100 text-gray-700 uppercase text-xs">{exp.format}</span>
+                                <div className="flex-1 min-w-0">
+                                    <h4 className="font-medium text-gray-900">{option.name}</h4>
+                                    <p className="text-xs text-gray-500 mt-0.5">{option.description}</p>
+                                </div>
                             </div>
-                        ))}
-                    </div>
+                            <div className="mt-4 flex items-center gap-2">
+                                <button className="flex-1 btn-secondary py-2 text-xs sm:text-sm">
+                                    <FileSpreadsheet className="h-4 w-4" />
+                                    Excel
+                                </button>
+                                <button className="flex-1 btn-secondary py-2 text-xs sm:text-sm">
+                                    <FileText className="h-4 w-4" />
+                                    CSV
+                                </button>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+
+            {/* Recent Exports */}
+            <div className="card overflow-hidden">
+                <div className="p-4 sm:p-5 border-b border-gray-200 flex items-center gap-2">
+                    <Clock className="h-5 w-5 text-gray-400" />
+                    <h3 className="font-semibold text-gray-900">Export Terakhir</h3>
+                </div>
+
+                {/* Mobile View */}
+                <div className="mobile-card divide-y divide-gray-100">
+                    {recentExports.map((file, idx) => (
+                        <div key={idx} className="p-4 flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                                <div className="h-10 w-10 rounded-lg bg-green-100 flex items-center justify-center flex-shrink-0">
+                                    <FileSpreadsheet className="h-5 w-5 text-green-600" />
+                                </div>
+                                <div>
+                                    <p className="font-medium text-gray-900 text-sm">{file.name}</p>
+                                    <p className="text-xs text-gray-500">{file.date} • {file.size}</p>
+                                </div>
+                            </div>
+                            <button className="btn-secondary p-2">
+                                <Download className="h-4 w-4" />
+                            </button>
+                        </div>
+                    ))}
+                </div>
+
+                {/* Desktop View */}
+                <div className="desktop-table table-responsive">
+                    <table className="w-full">
+                        <thead className="bg-gray-50">
+                            <tr>
+                                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">File</th>
+                                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Tanggal</th>
+                                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Ukuran</th>
+                                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Status</th>
+                                <th className="px-4 py-3 text-center text-xs font-medium uppercase tracking-wider text-gray-500">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-100">
+                            {recentExports.map((file, idx) => (
+                                <tr key={idx} className="hover:bg-gray-50">
+                                    <td className="px-4 py-3">
+                                        <div className="flex items-center gap-3">
+                                            <FileSpreadsheet className="h-5 w-5 text-green-600" />
+                                            <span className="font-medium text-gray-900">{file.name}</span>
+                                        </div>
+                                    </td>
+                                    <td className="px-4 py-3 text-sm text-gray-600">{file.date}</td>
+                                    <td className="px-4 py-3 text-sm text-gray-600">{file.size}</td>
+                                    <td className="px-4 py-3">
+                                        <span className="badge badge-success flex items-center gap-1 w-fit">
+                                            <CheckCircle className="h-3 w-3" />
+                                            Selesai
+                                        </span>
+                                    </td>
+                                    <td className="px-4 py-3">
+                                        <div className="flex items-center justify-center">
+                                            <button className="btn-secondary py-1.5 px-3 text-sm">
+                                                <Download className="h-4 w-4" />
+                                                Download
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>

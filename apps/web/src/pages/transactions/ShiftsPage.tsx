@@ -1,168 +1,195 @@
 import { useState } from 'react';
-import { Plus, Search, Eye, Clock, DollarSign, Play, Square } from 'lucide-react';
+import { Search, Download, DollarSign, Clock, User, Calendar, Wallet, TrendingUp } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
 
 export default function ShiftsPage() {
-    const [filter, setFilter] = useState('all');
+    const [search, setSearch] = useState('');
 
-    // Sample data
+    // Current shift info
+    const currentShift = {
+        cashier: 'Admin',
+        startTime: '08:00',
+        openingCash: 500000,
+        currentCash: 1250000,
+        transactions: 24,
+        hours: 4.5,
+    };
+
+    // Shift history
     const shifts = [
-        {
-            id: 'SHF-001',
-            cashier: 'Budi Santoso',
-            startTime: '2024-01-15 08:00',
-            endTime: '2024-01-15 16:00',
-            openingCash: 500000,
-            closingCash: 2850000,
-            transactions: 45,
-            totalSales: 3250000,
-            status: 'closed',
-        },
-        {
-            id: 'SHF-002',
-            cashier: 'Siti Aminah',
-            startTime: '2024-01-15 16:00',
-            endTime: null,
-            openingCash: 500000,
-            closingCash: null,
-            transactions: 28,
-            totalSales: 1850000,
-            status: 'open',
-        },
+        { id: 1, cashier: 'Admin', date: '15 Jan 2024', start: '08:00', end: '16:00', opening: 500000, closing: 1850000, transactions: 45, variance: 0 },
+        { id: 2, cashier: 'Kasir 1', date: '14 Jan 2024', start: '16:00', end: '22:00', opening: 500000, closing: 1420000, transactions: 32, variance: 0 },
+        { id: 3, cashier: 'Kasir 2', date: '14 Jan 2024', start: '08:00', end: '16:00', opening: 500000, closing: 1650000, transactions: 38, variance: -10000 },
     ];
 
-    const activeShift = shifts.find(s => s.status === 'open');
-
     return (
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
             {/* Header */}
-            <div className="flex items-center justify-between">
+            <div className="page-header">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900">Shift Kasir</h1>
-                    <p className="text-gray-500">Kelola shift kerja kasir dan kas awal/akhir</p>
+                    <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Shift Kasir</h1>
+                    <p className="text-sm text-gray-500">Kelola shift dan kas kasir</p>
                 </div>
-                {!activeShift ? (
-                    <button className="btn-primary">
-                        <Play className="h-4 w-4" />
-                        Mulai Shift
-                    </button>
-                ) : (
-                    <button className="btn-secondary border-red-300 text-red-600 hover:bg-red-50">
-                        <Square className="h-4 w-4" />
-                        Tutup Shift
-                    </button>
-                )}
+                <button className="btn-primary text-sm">
+                    <Clock className="h-4 w-4" />
+                    <span className="hidden sm:inline">Tutup</span> Shift
+                </button>
             </div>
 
-            {/* Active Shift Card */}
-            {activeShift && (
-                <div className="card p-5 bg-green-50 border-green-200">
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                            <div className="h-12 w-12 rounded-full bg-green-100 flex items-center justify-center">
-                                <Clock className="h-6 w-6 text-green-600" />
+            {/* Current Shift Card */}
+            <div className="card bg-gradient-to-br from-primary-500 to-primary-600 text-white overflow-hidden">
+                <div className="p-4 sm:p-6">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4 sm:mb-6">
+                        <div className="flex items-center gap-3">
+                            <div className="h-12 w-12 rounded-full bg-white/20 flex items-center justify-center">
+                                <User className="h-6 w-6" />
                             </div>
                             <div>
-                                <h3 className="font-semibold text-green-900">Shift Aktif</h3>
-                                <p className="text-sm text-green-700">
-                                    {activeShift.cashier} • Mulai {activeShift.startTime}
-                                </p>
+                                <p className="text-primary-100 text-sm">Shift Aktif</p>
+                                <p className="text-lg sm:text-xl font-bold">{currentShift.cashier}</p>
                             </div>
                         </div>
-                        <div className="flex items-center gap-6">
-                            <div className="text-right">
-                                <p className="text-sm text-green-700">Transaksi</p>
-                                <p className="text-xl font-bold text-green-900">{activeShift.transactions}</p>
+                        <div className="text-left sm:text-right">
+                            <p className="text-primary-100 text-sm">Mulai</p>
+                            <p className="font-bold">{currentShift.startTime} ({currentShift.hours} jam)</p>
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+                        <div className="bg-white/10 rounded-xl p-3 sm:p-4">
+                            <div className="flex items-center gap-2 mb-1">
+                                <Wallet className="h-4 w-4 text-primary-200" />
+                                <span className="text-xs sm:text-sm text-primary-100">Modal Awal</span>
                             </div>
-                            <div className="text-right">
-                                <p className="text-sm text-green-700">Total Penjualan</p>
-                                <p className="text-xl font-bold text-green-900">{formatCurrency(activeShift.totalSales)}</p>
+                            <p className="font-bold text-sm sm:text-lg">{formatCurrency(currentShift.openingCash)}</p>
+                        </div>
+                        <div className="bg-white/10 rounded-xl p-3 sm:p-4">
+                            <div className="flex items-center gap-2 mb-1">
+                                <DollarSign className="h-4 w-4 text-primary-200" />
+                                <span className="text-xs sm:text-sm text-primary-100">Kas Saat Ini</span>
                             </div>
+                            <p className="font-bold text-sm sm:text-lg">{formatCurrency(currentShift.currentCash)}</p>
+                        </div>
+                        <div className="bg-white/10 rounded-xl p-3 sm:p-4">
+                            <div className="flex items-center gap-2 mb-1">
+                                <TrendingUp className="h-4 w-4 text-primary-200" />
+                                <span className="text-xs sm:text-sm text-primary-100">Transaksi</span>
+                            </div>
+                            <p className="font-bold text-sm sm:text-lg">{currentShift.transactions}</p>
+                        </div>
+                        <div className="bg-white/10 rounded-xl p-3 sm:p-4">
+                            <div className="flex items-center gap-2 mb-1">
+                                <Calendar className="h-4 w-4 text-primary-200" />
+                                <span className="text-xs sm:text-sm text-primary-100">Selisih</span>
+                            </div>
+                            <p className="font-bold text-sm sm:text-lg text-green-300">Rp 0</p>
                         </div>
                     </div>
                 </div>
-            )}
+            </div>
 
             {/* Filter */}
-            <div className="card p-4">
-                <div className="flex flex-wrap gap-4">
-                    <select
-                        value={filter}
-                        onChange={(e) => setFilter(e.target.value)}
-                        className="input w-auto"
-                    >
-                        <option value="all">Semua Shift</option>
-                        <option value="today">Hari Ini</option>
-                        <option value="week">Minggu Ini</option>
-                        <option value="month">Bulan Ini</option>
-                    </select>
-                    <input type="date" className="input w-auto" />
-                    <input type="date" className="input w-auto" />
+            <div className="card p-3 sm:p-4">
+                <div className="filter-section">
+                    <div className="relative flex-1 min-w-0">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                        <input
+                            type="text"
+                            placeholder="Cari kasir..."
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            className="input pl-10"
+                        />
+                    </div>
+                    <input type="date" className="input w-full sm:w-auto" />
+                    <button className="btn-secondary text-sm">
+                        <Download className="h-4 w-4" />
+                        <span className="hidden sm:inline">Export</span>
+                    </button>
                 </div>
             </div>
 
-            {/* Table */}
-            <div className="card overflow-hidden">
-                <table className="w-full">
-                    <thead className="bg-gray-50 border-b border-gray-200">
-                        <tr>
-                            <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                                Shift ID
-                            </th>
-                            <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                                Kasir
-                            </th>
-                            <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                                Waktu
-                            </th>
-                            <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                                Kas Awal
-                            </th>
-                            <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                                Kas Akhir
-                            </th>
-                            <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                                Transaksi
-                            </th>
-                            <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                                Status
-                            </th>
-                            <th className="px-4 py-3 text-center text-xs font-medium uppercase tracking-wider text-gray-500">
-                                Aksi
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-100">
-                        {shifts.map((shift) => (
-                            <tr key={shift.id} className="hover:bg-gray-50">
-                                <td className="px-4 py-3">
-                                    <span className="font-mono text-sm text-gray-600">{shift.id}</span>
-                                </td>
-                                <td className="px-4 py-3 font-medium text-gray-900">{shift.cashier}</td>
-                                <td className="px-4 py-3 text-sm text-gray-600">
-                                    {shift.startTime} {shift.endTime && `- ${shift.endTime.split(' ')[1]}`}
-                                </td>
-                                <td className="px-4 py-3 text-sm text-gray-900">{formatCurrency(shift.openingCash)}</td>
-                                <td className="px-4 py-3 text-sm text-gray-900">
-                                    {shift.closingCash ? formatCurrency(shift.closingCash) : '-'}
-                                </td>
-                                <td className="px-4 py-3 text-sm text-gray-600">{shift.transactions}</td>
-                                <td className="px-4 py-3">
-                                    <span className={`badge ${shift.status === 'open' ? 'badge-success' : 'bg-gray-100 text-gray-700'}`}>
-                                        {shift.status === 'open' ? 'Aktif' : 'Selesai'}
-                                    </span>
-                                </td>
-                                <td className="px-4 py-3">
-                                    <div className="flex items-center justify-center">
-                                        <button className="p-1.5 hover:bg-gray-100 rounded-lg" title="Lihat Detail">
-                                            <Eye className="h-4 w-4 text-gray-500" />
-                                        </button>
-                                    </div>
-                                </td>
+            {/* Mobile Card View */}
+            <div className="mobile-card space-y-3">
+                {shifts.map((shift) => (
+                    <div key={shift.id} className="card p-4">
+                        <div className="flex items-start justify-between mb-3">
+                            <div className="flex items-center gap-3">
+                                <div className="h-10 w-10 rounded-full bg-primary-100 flex items-center justify-center flex-shrink-0">
+                                    <User className="h-5 w-5 text-primary-600" />
+                                </div>
+                                <div>
+                                    <h3 className="font-medium text-gray-900">{shift.cashier}</h3>
+                                    <p className="text-xs text-gray-500">{shift.date}</p>
+                                </div>
+                            </div>
+                            <span className="text-xs text-gray-500">{shift.start} - {shift.end}</span>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2 text-sm mb-3">
+                            <div>
+                                <p className="text-gray-500">Modal Awal</p>
+                                <p className="font-medium">{formatCurrency(shift.opening)}</p>
+                            </div>
+                            <div>
+                                <p className="text-gray-500">Kas Akhir</p>
+                                <p className="font-medium">{formatCurrency(shift.closing)}</p>
+                            </div>
+                            <div>
+                                <p className="text-gray-500">Transaksi</p>
+                                <p className="font-medium">{shift.transactions}</p>
+                            </div>
+                            <div>
+                                <p className="text-gray-500">Selisih</p>
+                                <p className={`font-bold ${shift.variance < 0 ? 'text-red-600' : 'text-green-600'}`}>
+                                    {shift.variance === 0 ? 'Rp 0' : formatCurrency(shift.variance)}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                ))}
+            </div>
+
+            {/* Desktop Table View */}
+            <div className="desktop-table card overflow-hidden">
+                <div className="table-responsive">
+                    <table className="w-full">
+                        <thead className="bg-gray-50 border-b border-gray-200">
+                            <tr>
+                                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Kasir</th>
+                                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Tanggal</th>
+                                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Waktu</th>
+                                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Modal Awal</th>
+                                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Kas Akhir</th>
+                                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Transaksi</th>
+                                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Selisih</th>
                             </tr>
-                        ))}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody className="divide-y divide-gray-100">
+                            {shifts.map((shift) => (
+                                <tr key={shift.id} className="hover:bg-gray-50">
+                                    <td className="px-4 py-3">
+                                        <div className="flex items-center gap-3">
+                                            <div className="h-8 w-8 rounded-full bg-primary-100 flex items-center justify-center">
+                                                <User className="h-4 w-4 text-primary-600" />
+                                            </div>
+                                            <span className="font-medium text-gray-900">{shift.cashier}</span>
+                                        </div>
+                                    </td>
+                                    <td className="px-4 py-3 text-sm text-gray-600">{shift.date}</td>
+                                    <td className="px-4 py-3 text-sm text-gray-600">{shift.start} - {shift.end}</td>
+                                    <td className="px-4 py-3 text-sm text-gray-900">{formatCurrency(shift.opening)}</td>
+                                    <td className="px-4 py-3 text-sm font-medium text-gray-900">{formatCurrency(shift.closing)}</td>
+                                    <td className="px-4 py-3 text-sm text-gray-600">{shift.transactions}</td>
+                                    <td className="px-4 py-3">
+                                        <span className={`font-medium ${shift.variance < 0 ? 'text-red-600' : 'text-green-600'}`}>
+                                            {shift.variance === 0 ? 'Rp 0' : formatCurrency(shift.variance)}
+                                        </span>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     );
