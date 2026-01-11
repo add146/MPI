@@ -47,17 +47,16 @@ const navigation = [
         icon: Package,
         children: [
             { name: 'Produk Jadi', href: '/catalog/products' },
-            { name: 'Bahan Baku', href: '/catalog/raw-materials', isNew: true },
+            { name: 'Bahan Baku', href: '/catalog/raw-materials' },
             { name: 'Kategori', href: '/catalog/categories' },
             { name: 'Brand', href: '/catalog/brands' },
-            { name: 'Resep Produksi', href: '/catalog/recipes', isNew: true },
-            { name: 'Bundle Promo', href: '/catalog/bundles', isNew: true },
+            { name: 'Resep Produksi', href: '/catalog/recipes' },
+            { name: 'Bundle Promo', href: '/catalog/bundles' },
         ],
     },
     {
         name: 'Harga & Level',
         icon: Tags,
-        isNew: true,
         children: [
             { name: 'Price Levels', href: '/pricing/levels' },
             { name: 'Product Prices', href: '/pricing/products' },
@@ -69,8 +68,8 @@ const navigation = [
         icon: Users,
         children: [
             { name: 'Daftar Pelanggan', href: '/customers' },
-            { name: 'Level Pelanggan', href: '/customers/levels', isNew: true },
-            { name: 'Riwayat Poin', href: '/customers/points', isNew: true },
+            { name: 'Level Pelanggan', href: '/customers/levels' },
+            { name: 'Riwayat Poin', href: '/customers/points' },
         ],
     },
     {
@@ -78,7 +77,7 @@ const navigation = [
         icon: Warehouse,
         children: [
             { name: 'Stok Produk', href: '/inventory/products' },
-            { name: 'Stok Bahan Baku', href: '/inventory/raw-materials', isNew: true },
+            { name: 'Stok Bahan Baku', href: '/inventory/raw-materials' },
             { name: 'Purchase Order', href: '/inventory/purchase-orders' },
             { name: 'Transfer Stok', href: '/inventory/transfers' },
             { name: 'Adjustment', href: '/inventory/adjustments' },
@@ -98,10 +97,10 @@ const navigation = [
         icon: BarChart3,
         children: [
             { name: 'Penjualan', href: '/reports/sales' },
-            { name: 'Neraca', href: '/reports/balance-sheet', isNew: true },
-            { name: 'Laba Rugi', href: '/reports/profit-loss', isNew: true },
-            { name: 'HPP', href: '/reports/hpp', isNew: true },
-            { name: 'Export Excel', href: '/reports/export', isNew: true },
+            { name: 'Neraca', href: '/reports/balance-sheet' },
+            { name: 'Laba Rugi', href: '/reports/profit-loss' },
+            { name: 'HPP', href: '/reports/hpp' },
+            { name: 'Export Excel', href: '/reports/export' },
         ],
     },
     {
@@ -130,9 +129,6 @@ function NavItem({ item }: { item: typeof navigation[0] }) {
                     <span className="flex items-center gap-3">
                         <item.icon className="h-5 w-5" />
                         {item.name}
-                        {'isNew' in item && item.isNew && (
-                            <span className="ml-1 px-1.5 py-0.5 text-[10px] font-medium bg-amber-500 text-white rounded">MPI</span>
-                        )}
                     </span>
                     <ChevronDown
                         className={cn('h-4 w-4 transition-transform', isOpen && 'rotate-180')}
@@ -145,13 +141,10 @@ function NavItem({ item }: { item: typeof navigation[0] }) {
                                 key={child.href}
                                 to={child.href}
                                 className={({ isActive }) =>
-                                    cn('sidebar-link text-sm flex items-center justify-between', isActive && 'active')
+                                    cn('sidebar-link text-sm', isActive && 'active')
                                 }
                             >
-                                <span>{child.name}</span>
-                                {'isNew' in child && child.isNew && (
-                                    <span className="px-1 py-0.5 text-[9px] font-medium bg-primary-500/30 text-primary-300 rounded">🆕</span>
-                                )}
+                                {child.name}
                             </NavLink>
                         ))}
                     </div>
