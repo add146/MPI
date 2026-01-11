@@ -1,169 +1,149 @@
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { useAuthStore } from '@/stores/auth';
-import { transactionsApi } from '@/lib/api';
+import { Search, Download, Eye, Receipt, CheckCircle, XCircle, Clock } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
-import {
-    Search,
-    Download,
-    Eye,
-    Receipt,
-    ChevronLeft,
-    ChevronRight,
-    Calendar,
-    CheckCircle,
-    XCircle,
-    Clock,
-} from 'lucide-react';
 
 export default function TransactionsPage() {
-    const { currentOutletId } = useAuthStore();
     const [search, setSearch] = useState('');
     const [status, setStatus] = useState('');
-    const [paymentMethod, setPaymentMethod] = useState('');
-    const [dateFrom, setDateFrom] = useState('');
-    const [dateTo, setDateTo] = useState('');
-    const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 10;
+    const [payment, setPayment] = useState('');
 
-    const { data, isLoading } = useQuery({
-        queryKey: ['transactions', currentOutletId],
-        queryFn: () => transactionsApi.getAll(currentOutletId!),
-        enabled: !!currentOutletId,
-    });
+    // Sample data
+    const transactions = [
+        { id: 'TRX-001', date: '2024-01-15 14:30', customer: 'Budi Santoso', items: 3, total: 85000, payment: 'Tunai', status: 'completed', cashier: 'Admin' },
+        { id: 'TRX-002', date: '2024-01-15 13:45', customer: 'Siti Aminah', items: 5, total: 142000, payment: 'QRIS', status: 'completed', cashier: 'Admin' },
+        { id: 'TRX-003', date: '2024-01-15 12:20', customer: 'Walk-in', items: 2, total: 36000, payment: 'Tunai', status: 'completed', cashier: 'Kasir 1' },
+        { id: 'TRX-004', date: '2024-01-15 11:00', customer: 'Ahmad', items: 1, total: 18000, payment: 'Transfer', status: 'pending', cashier: 'Admin' },
+    ];
 
-    const transactions = data?.data || [];
-    const filteredTransactions = transactions.filter((t: any) => {
-        if (status && t.paymentStatus !== status) return false;
-        return true;
-    });
-    const totalItems = filteredTransactions.length;
-    const totalPages = Math.ceil(totalItems / itemsPerPage);
-    const paginatedTransactions = filteredTransactions.slice(
-        (currentPage - 1) * itemsPerPage,
-        currentPage * itemsPerPage
-    );
-
-    const getStatusBadge = (paymentStatus: string) => {
-        switch (paymentStatus) {
-            case 'paid':
+    const getStatusBadge = (status: string) => {
+        switch (status) {
+            case 'completed':
                 return (
-                    <span className="badge badge-success flex items-center gap-1">
+                    <span className="badge badge-success flex items-center gap-1 w-fit">
                         <CheckCircle className="h-3 w-3" />
                         Selesai
                     </span>
                 );
             case 'pending':
                 return (
-                    <span className="badge badge-warning flex items-center gap-1">
+                    <span className="badge badge-warning flex items-center gap-1 w-fit">
                         <Clock className="h-3 w-3" />
                         Pending
                     </span>
                 );
-            case 'refunded':
+            case 'cancelled':
                 return (
-                    <span className="badge badge-danger flex items-center gap-1">
+                    <span className="badge badge-danger flex items-center gap-1 w-fit">
                         <XCircle className="h-3 w-3" />
-                        Refund
+                        Batal
                     </span>
                 );
             default:
-                return <span className="badge">{paymentStatus}</span>;
+                return <span className="badge">{status}</span>;
         }
     };
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
             {/* Header */}
-            <div className="flex items-center justify-between">
+            <div className="page-header">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900">Riwayat Transaksi</h1>
-                    <p className="text-gray-500">Lihat semua transaksi penjualan</p>
+                    <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Riwayat Transaksi</h1>
+                    <p className="text-sm text-gray-500">Lihat semua transaksi penjualan</p>
                 </div>
-                <button className="btn-secondary">
+                <button className="btn-secondary text-sm">
                     <Download className="h-4 w-4" />
-                    Export
+                    <span className="hidden sm:inline">Export</span>
                 </button>
             </div>
 
-            {/* Filter Section */}
-            <div className="card p-4">
-                <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-                    <div>
-                        <label className="label">Tanggal Mulai</label>
-                        <div className="relative">
-                            <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                            <input
-                                type="date"
-                                value={dateFrom}
-                                onChange={(e) => setDateFrom(e.target.value)}
-                                className="input pl-10"
-                            />
-                        </div>
+            {/* Filter */}
+            <div className="card p-3 sm:p-4">
+                <div className="filter-section">
+                    <div className="relative flex-1 min-w-0">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                        <input
+                            type="text"
+                            placeholder="Cari no. transaksi..."
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            className="input pl-10"
+                        />
                     </div>
-                    <div>
-                        <label className="label">Tanggal Akhir</label>
-                        <div className="relative">
-                            <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                            <input
-                                type="date"
-                                value={dateTo}
-                                onChange={(e) => setDateTo(e.target.value)}
-                                className="input pl-10"
-                            />
-                        </div>
-                    </div>
-                    <div>
-                        <label className="label">Status</label>
-                        <select
-                            value={status}
-                            onChange={(e) => setStatus(e.target.value)}
-                            className="input"
-                        >
-                            <option value="">Semua Status</option>
-                            <option value="paid">Selesai</option>
-                            <option value="pending">Pending</option>
-                            <option value="refunded">Refund</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label className="label">Metode Bayar</label>
-                        <select
-                            value={paymentMethod}
-                            onChange={(e) => setPaymentMethod(e.target.value)}
-                            className="input"
-                        >
-                            <option value="">Semua Metode</option>
-                            <option value="cash">Tunai</option>
-                            <option value="qris">QRIS</option>
-                            <option value="transfer">Transfer</option>
-                            <option value="debit">Debit</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label className="label">Cari</label>
-                        <div className="relative">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                            <input
-                                type="text"
-                                placeholder="No. Invoice..."
-                                value={search}
-                                onChange={(e) => setSearch(e.target.value)}
-                                className="input pl-10"
-                            />
-                        </div>
-                    </div>
+                    <select
+                        value={status}
+                        onChange={(e) => setStatus(e.target.value)}
+                        className="input w-full sm:w-auto"
+                    >
+                        <option value="">Semua Status</option>
+                        <option value="completed">Selesai</option>
+                        <option value="pending">Pending</option>
+                        <option value="cancelled">Batal</option>
+                    </select>
+                    <select
+                        value={payment}
+                        onChange={(e) => setPayment(e.target.value)}
+                        className="input w-full sm:w-auto"
+                    >
+                        <option value="">Semua Pembayaran</option>
+                        <option value="tunai">Tunai</option>
+                        <option value="qris">QRIS</option>
+                        <option value="transfer">Transfer</option>
+                    </select>
                 </div>
             </div>
 
-            {/* Table */}
-            <div className="card overflow-hidden">
-                <div className="overflow-x-auto">
+            {/* Mobile Card View */}
+            <div className="mobile-card space-y-3">
+                {transactions.map((trx) => (
+                    <div key={trx.id} className="card p-4">
+                        <div className="flex items-start justify-between mb-3">
+                            <div>
+                                <p className="font-mono text-sm font-medium text-primary-600">{trx.id}</p>
+                                <p className="text-xs text-gray-500">{trx.date}</p>
+                            </div>
+                            {getStatusBadge(trx.status)}
+                        </div>
+                        <div className="grid grid-cols-2 gap-2 text-sm mb-3">
+                            <div>
+                                <p className="text-gray-500">Pelanggan</p>
+                                <p className="font-medium">{trx.customer}</p>
+                            </div>
+                            <div>
+                                <p className="text-gray-500">Kasir</p>
+                                <p className="font-medium">{trx.cashier}</p>
+                            </div>
+                            <div>
+                                <p className="text-gray-500">Items</p>
+                                <p className="font-medium">{trx.items} item</p>
+                            </div>
+                            <div>
+                                <p className="text-gray-500">Pembayaran</p>
+                                <p className="font-medium">{trx.payment}</p>
+                            </div>
+                        </div>
+                        <div className="flex items-center justify-between pt-3 border-t border-gray-100">
+                            <div>
+                                <p className="text-xs text-gray-500">Total</p>
+                                <p className="font-bold text-gray-900">{formatCurrency(trx.total)}</p>
+                            </div>
+                            <button className="btn-secondary py-2 text-sm">
+                                <Receipt className="h-4 w-4" />
+                                Lihat Struk
+                            </button>
+                        </div>
+                    </div>
+                ))}
+            </div>
+
+            {/* Desktop Table View */}
+            <div className="desktop-table card overflow-hidden">
+                <div className="table-responsive">
                     <table className="w-full">
                         <thead className="bg-gray-50 border-b border-gray-200">
                             <tr>
                                 <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                                    No. Invoice
+                                    No. Transaksi
                                 </th>
                                 <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                                     Tanggal
@@ -189,102 +169,47 @@ export default function TransactionsPage() {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-100">
-                            {isLoading ? (
-                                <tr>
-                                    <td colSpan={8} className="px-4 py-8 text-center text-gray-500">
-                                        Memuat data...
+                            {transactions.map((trx) => (
+                                <tr key={trx.id} className="hover:bg-gray-50">
+                                    <td className="px-4 py-3">
+                                        <span className="font-mono text-sm font-medium text-primary-600">{trx.id}</span>
+                                    </td>
+                                    <td className="px-4 py-3 text-sm text-gray-600">{trx.date}</td>
+                                    <td className="px-4 py-3 font-medium text-gray-900">{trx.customer}</td>
+                                    <td className="px-4 py-3 text-sm text-gray-600">{trx.items}</td>
+                                    <td className="px-4 py-3 font-medium text-gray-900">{formatCurrency(trx.total)}</td>
+                                    <td className="px-4 py-3">
+                                        <span className="badge bg-gray-100 text-gray-700">{trx.payment}</span>
+                                    </td>
+                                    <td className="px-4 py-3">{getStatusBadge(trx.status)}</td>
+                                    <td className="px-4 py-3">
+                                        <div className="flex items-center justify-center">
+                                            <button className="p-1.5 hover:bg-gray-100 rounded-lg" title="Lihat Struk">
+                                                <Receipt className="h-4 w-4 text-gray-500" />
+                                            </button>
+                                        </div>
                                     </td>
                                 </tr>
-                            ) : paginatedTransactions.length === 0 ? (
-                                <tr>
-                                    <td colSpan={8} className="px-4 py-8 text-center text-gray-500">
-                                        <Receipt className="h-12 w-12 mx-auto text-gray-300 mb-2" />
-                                        <p>Belum ada transaksi</p>
-                                        <p className="text-sm">Transaksi akan muncul di sini setelah Anda melakukan penjualan</p>
-                                    </td>
-                                </tr>
-                            ) : (
-                                paginatedTransactions.map((transaction: any) => (
-                                    <tr key={transaction.id} className="hover:bg-gray-50">
-                                        <td className="px-4 py-3">
-                                            <span className="font-mono text-sm font-medium text-primary-600">
-                                                #{transaction.id.slice(0, 8).toUpperCase()}
-                                            </span>
-                                        </td>
-                                        <td className="px-4 py-3 text-sm text-gray-600">
-                                            {new Date(transaction.createdAt).toLocaleDateString('id-ID', {
-                                                day: 'numeric',
-                                                month: 'short',
-                                                year: 'numeric',
-                                                hour: '2-digit',
-                                                minute: '2-digit',
-                                            })}
-                                        </td>
-                                        <td className="px-4 py-3 text-sm text-gray-900">
-                                            {transaction.customer?.name || 'Walk-in Customer'}
-                                        </td>
-                                        <td className="px-4 py-3 text-sm text-gray-600">
-                                            {transaction.items?.length || 0} item
-                                        </td>
-                                        <td className="px-4 py-3 text-sm font-medium text-gray-900">
-                                            {formatCurrency(transaction.total)}
-                                        </td>
-                                        <td className="px-4 py-3 text-sm text-gray-600 capitalize">
-                                            {transaction.paymentMethod || '-'}
-                                        </td>
-                                        <td className="px-4 py-3">
-                                            {getStatusBadge(transaction.paymentStatus)}
-                                        </td>
-                                        <td className="px-4 py-3">
-                                            <div className="flex items-center justify-center">
-                                                <button className="p-1.5 hover:bg-gray-100 rounded-lg" title="Lihat Detail">
-                                                    <Eye className="h-4 w-4 text-gray-500" />
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))
-                            )}
+                            ))}
                         </tbody>
                     </table>
                 </div>
+            </div>
 
-                {/* Pagination */}
-                {totalPages > 1 && (
-                    <div className="px-4 py-3 border-t border-gray-200 flex items-center justify-between">
-                        <p className="text-sm text-gray-500">
-                            Menampilkan {(currentPage - 1) * itemsPerPage + 1} - {Math.min(currentPage * itemsPerPage, totalItems)} dari {totalItems} transaksi
-                        </p>
-                        <div className="flex items-center gap-2">
-                            <button
-                                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                                disabled={currentPage === 1}
-                                className="p-2 hover:bg-gray-100 rounded-lg disabled:opacity-50"
-                            >
-                                <ChevronLeft className="h-4 w-4" />
-                            </button>
-                            {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-                                <button
-                                    key={page}
-                                    onClick={() => setCurrentPage(page)}
-                                    className={`px-3 py-1 rounded-lg text-sm font-medium ${currentPage === page
-                                            ? 'bg-primary-500 text-white'
-                                            : 'hover:bg-gray-100 text-gray-700'
-                                        }`}
-                                >
-                                    {page}
-                                </button>
-                            ))}
-                            <button
-                                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                                disabled={currentPage === totalPages}
-                                className="p-2 hover:bg-gray-100 rounded-lg disabled:opacity-50"
-                            >
-                                <ChevronRight className="h-4 w-4" />
-                            </button>
-                        </div>
-                    </div>
-                )}
+            {/* Pagination */}
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                <p className="text-sm text-gray-500 order-2 sm:order-1">
+                    Menampilkan 1-4 dari 4 transaksi
+                </p>
+                <div className="flex items-center gap-2 order-1 sm:order-2">
+                    <button className="btn-secondary px-3 py-2 text-sm" disabled>
+                        Prev
+                    </button>
+                    <button className="btn-primary px-3 py-2 text-sm">1</button>
+                    <button className="btn-secondary px-3 py-2 text-sm">
+                        Next
+                    </button>
+                </div>
             </div>
         </div>
     );

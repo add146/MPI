@@ -1,113 +1,138 @@
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { useAuthStore } from '@/stores/auth';
-import { productsApi } from '@/lib/api';
+import { Plus, Search, Filter, Download, Upload, Eye, Edit, Trash2, Package } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
-import {
-    Plus,
-    Search,
-    Filter,
-    Download,
-    Upload,
-    MoreHorizontal,
-    Edit,
-    Trash2,
-    Eye,
-    Package,
-    ChevronLeft,
-    ChevronRight,
-} from 'lucide-react';
 
 export default function ProductsPage() {
-    const { currentOutletId } = useAuthStore();
     const [search, setSearch] = useState('');
     const [category, setCategory] = useState('');
     const [brand, setBrand] = useState('');
-    const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 10;
 
-    const { data, isLoading } = useQuery({
-        queryKey: ['products', currentOutletId, search, category, brand],
-        queryFn: () => productsApi.getAll(currentOutletId!),
-        enabled: !!currentOutletId,
-    });
-
-    const products = data?.data || [];
-    const totalItems = products.length;
-    const totalPages = Math.ceil(totalItems / itemsPerPage);
-    const paginatedProducts = products.slice(
-        (currentPage - 1) * itemsPerPage,
-        currentPage * itemsPerPage
-    );
+    // Sample data
+    const products = [
+        { id: 1, name: 'Roti Tawar', sku: 'RTW-001', category: 'Makanan', brand: 'Home Made', price: 18000, stock: 45, status: 'active' },
+        { id: 2, name: 'Kopi Susu Aren', sku: 'KSA-001', category: 'Minuman', brand: 'Brand Premium', price: 18000, stock: 28, status: 'active' },
+        { id: 3, name: 'Donat Coklat', sku: 'DNT-001', category: 'Snack', brand: 'Home Made', price: 8000, stock: 8, status: 'low_stock' },
+        { id: 4, name: 'Croissant Butter', sku: 'CRS-001', category: 'Makanan', brand: 'Brand Premium', price: 15000, stock: 0, status: 'out_of_stock' },
+    ];
 
     return (
-        <div className="space-y-6">
-            {/* Header */}
-            <div className="flex items-center justify-between">
+        <div className="space-y-4 sm:space-y-6">
+            {/* Header - Responsive */}
+            <div className="page-header">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900">Produk Jadi</h1>
-                    <p className="text-gray-500">Kelola daftar produk yang dijual di outlet Anda</p>
+                    <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Produk Jadi</h1>
+                    <p className="text-sm text-gray-500">Kelola daftar produk yang dijual di outlet Anda</p>
                 </div>
-                <div className="flex items-center gap-2">
-                    <button className="btn-secondary">
+                <div className="action-buttons">
+                    <button className="btn-secondary text-sm">
                         <Upload className="h-4 w-4" />
-                        Import
+                        <span className="hidden sm:inline">Import</span>
                     </button>
-                    <button className="btn-secondary">
+                    <button className="btn-secondary text-sm">
                         <Download className="h-4 w-4" />
-                        Export
+                        <span className="hidden sm:inline">Export</span>
                     </button>
-                    <button className="btn-primary">
+                    <button className="btn-primary text-sm">
                         <Plus className="h-4 w-4" />
-                        Tambah Produk
+                        <span className="hidden sm:inline">Tambah</span> Produk
                     </button>
                 </div>
             </div>
 
-            {/* Filter Section */}
-            <div className="card p-4">
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <div className="md:col-span-2">
-                        <div className="relative">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                            <input
-                                type="text"
-                                placeholder="Cari produk berdasarkan nama atau SKU..."
-                                value={search}
-                                onChange={(e) => setSearch(e.target.value)}
-                                className="input pl-10"
-                            />
+            {/* Filter Section - Responsive */}
+            <div className="card p-3 sm:p-4">
+                <div className="filter-section">
+                    <div className="relative flex-1 min-w-0">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                        <input
+                            type="text"
+                            placeholder="Cari produk..."
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            className="input pl-10"
+                        />
+                    </div>
+                    <select
+                        value={category}
+                        onChange={(e) => setCategory(e.target.value)}
+                        className="input w-full sm:w-auto"
+                    >
+                        <option value="">Semua Kategori</option>
+                        <option value="makanan">Makanan</option>
+                        <option value="minuman">Minuman</option>
+                        <option value="snack">Snack</option>
+                    </select>
+                    <select
+                        value={brand}
+                        onChange={(e) => setBrand(e.target.value)}
+                        className="input w-full sm:w-auto"
+                    >
+                        <option value="">Semua Brand</option>
+                        <option value="home-made">Home Made</option>
+                        <option value="brand-premium">Brand Premium</option>
+                    </select>
+                </div>
+            </div>
+
+            {/* Mobile Card View */}
+            <div className="mobile-card space-y-3">
+                {products.map((product) => (
+                    <div key={product.id} className="card p-4">
+                        <div className="flex items-start justify-between mb-3">
+                            <div className="flex items-center gap-3">
+                                <div className="h-12 w-12 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0">
+                                    <Package className="h-6 w-6 text-gray-400" />
+                                </div>
+                                <div>
+                                    <h3 className="font-medium text-gray-900">{product.name}</h3>
+                                    <p className="text-xs text-gray-500">{product.sku}</p>
+                                </div>
+                            </div>
+                            <span className={`badge text-xs ${product.status === 'active' ? 'badge-success' :
+                                    product.status === 'low_stock' ? 'badge-warning' : 'badge-danger'
+                                }`}>
+                                {product.status === 'active' ? 'Aktif' :
+                                    product.status === 'low_stock' ? 'Stok Rendah' : 'Habis'}
+                            </span>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2 text-sm mb-3">
+                            <div>
+                                <p className="text-gray-500">Kategori</p>
+                                <p className="font-medium">{product.category}</p>
+                            </div>
+                            <div>
+                                <p className="text-gray-500">Harga</p>
+                                <p className="font-medium text-primary-600">{formatCurrency(product.price)}</p>
+                            </div>
+                            <div>
+                                <p className="text-gray-500">Stok</p>
+                                <p className="font-medium">{product.stock}</p>
+                            </div>
+                            <div>
+                                <p className="text-gray-500">Brand</p>
+                                <p className="font-medium">{product.brand}</p>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-2 pt-3 border-t border-gray-100">
+                            <button className="flex-1 btn-secondary py-2 text-sm">
+                                <Eye className="h-4 w-4" />
+                                Lihat
+                            </button>
+                            <button className="flex-1 btn-secondary py-2 text-sm">
+                                <Edit className="h-4 w-4" />
+                                Edit
+                            </button>
+                            <button className="p-2 hover:bg-red-50 rounded-lg">
+                                <Trash2 className="h-4 w-4 text-red-500" />
+                            </button>
                         </div>
                     </div>
-                    <div>
-                        <select
-                            value={category}
-                            onChange={(e) => setCategory(e.target.value)}
-                            className="input"
-                        >
-                            <option value="">Semua Kategori</option>
-                            <option value="makanan">Makanan</option>
-                            <option value="minuman">Minuman</option>
-                            <option value="snack">Snack</option>
-                        </select>
-                    </div>
-                    <div>
-                        <select
-                            value={brand}
-                            onChange={(e) => setBrand(e.target.value)}
-                            className="input"
-                        >
-                            <option value="">Semua Brand</option>
-                            <option value="brand1">Brand A</option>
-                            <option value="brand2">Brand B</option>
-                        </select>
-                    </div>
-                </div>
+                ))}
             </div>
 
-            {/* Table */}
-            <div className="card overflow-hidden">
-                <div className="overflow-x-auto">
+            {/* Desktop Table View */}
+            <div className="desktop-table card overflow-hidden">
+                <div className="table-responsive">
                     <table className="w-full">
                         <thead className="bg-gray-50 border-b border-gray-200">
                             <tr>
@@ -135,111 +160,66 @@ export default function ProductsPage() {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-100">
-                            {isLoading ? (
-                                <tr>
-                                    <td colSpan={7} className="px-4 py-8 text-center text-gray-500">
-                                        Memuat data...
+                            {products.map((product) => (
+                                <tr key={product.id} className="hover:bg-gray-50">
+                                    <td className="px-4 py-3">
+                                        <div className="flex items-center gap-3">
+                                            <div className="h-10 w-10 rounded-lg bg-gray-100 flex items-center justify-center">
+                                                <Package className="h-5 w-5 text-gray-400" />
+                                            </div>
+                                            <span className="font-medium text-gray-900">{product.name}</span>
+                                        </div>
+                                    </td>
+                                    <td className="px-4 py-3 text-sm text-gray-600">{product.sku}</td>
+                                    <td className="px-4 py-3">
+                                        <span className="badge bg-gray-100 text-gray-700">{product.category}</span>
+                                    </td>
+                                    <td className="px-4 py-3 text-sm font-medium text-gray-900">
+                                        {formatCurrency(product.price)}
+                                    </td>
+                                    <td className="px-4 py-3 text-sm text-gray-600">{product.stock}</td>
+                                    <td className="px-4 py-3">
+                                        <span className={`badge ${product.status === 'active' ? 'badge-success' :
+                                                product.status === 'low_stock' ? 'badge-warning' : 'badge-danger'
+                                            }`}>
+                                            {product.status === 'active' ? 'Aktif' :
+                                                product.status === 'low_stock' ? 'Stok Rendah' : 'Habis'}
+                                        </span>
+                                    </td>
+                                    <td className="px-4 py-3">
+                                        <div className="flex items-center justify-center gap-2">
+                                            <button className="p-1.5 hover:bg-gray-100 rounded-lg">
+                                                <Eye className="h-4 w-4 text-gray-500" />
+                                            </button>
+                                            <button className="p-1.5 hover:bg-gray-100 rounded-lg">
+                                                <Edit className="h-4 w-4 text-gray-500" />
+                                            </button>
+                                            <button className="p-1.5 hover:bg-red-50 rounded-lg">
+                                                <Trash2 className="h-4 w-4 text-red-500" />
+                                            </button>
+                                        </div>
                                     </td>
                                 </tr>
-                            ) : paginatedProducts.length === 0 ? (
-                                <tr>
-                                    <td colSpan={7} className="px-4 py-8 text-center text-gray-500">
-                                        <Package className="h-12 w-12 mx-auto text-gray-300 mb-2" />
-                                        <p>Belum ada produk</p>
-                                        <p className="text-sm">Klik tombol "Tambah Produk" untuk menambah produk baru</p>
-                                    </td>
-                                </tr>
-                            ) : (
-                                paginatedProducts.map((product: any) => (
-                                    <tr key={product.id} className="hover:bg-gray-50">
-                                        <td className="px-4 py-3">
-                                            <div className="flex items-center gap-3">
-                                                <div className="h-10 w-10 rounded-lg bg-gray-100 flex items-center justify-center">
-                                                    {product.imageUrl ? (
-                                                        <img src={product.imageUrl} alt={product.name} className="h-full w-full object-cover rounded-lg" />
-                                                    ) : (
-                                                        <Package className="h-5 w-5 text-gray-400" />
-                                                    )}
-                                                </div>
-                                                <div>
-                                                    <p className="font-medium text-gray-900">{product.name}</p>
-                                                    <p className="text-sm text-gray-500">{product.description || '-'}</p>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td className="px-4 py-3 text-sm text-gray-600">
-                                            {product.sku || '-'}
-                                        </td>
-                                        <td className="px-4 py-3 text-sm text-gray-600">
-                                            {product.category?.name || '-'}
-                                        </td>
-                                        <td className="px-4 py-3 text-sm font-medium text-gray-900">
-                                            {formatCurrency(product.basePrice)}
-                                        </td>
-                                        <td className="px-4 py-3 text-sm text-gray-600">
-                                            {product.stockQty} pcs
-                                        </td>
-                                        <td className="px-4 py-3">
-                                            <span className={`badge ${product.isActive ? 'badge-success' : 'badge-danger'}`}>
-                                                {product.isActive ? 'Aktif' : 'Nonaktif'}
-                                            </span>
-                                        </td>
-                                        <td className="px-4 py-3">
-                                            <div className="flex items-center justify-center gap-2">
-                                                <button className="p-1.5 hover:bg-gray-100 rounded-lg" title="Lihat Detail">
-                                                    <Eye className="h-4 w-4 text-gray-500" />
-                                                </button>
-                                                <button className="p-1.5 hover:bg-gray-100 rounded-lg" title="Edit">
-                                                    <Edit className="h-4 w-4 text-gray-500" />
-                                                </button>
-                                                <button className="p-1.5 hover:bg-red-50 rounded-lg" title="Hapus">
-                                                    <Trash2 className="h-4 w-4 text-red-500" />
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))
-                            )}
+                            ))}
                         </tbody>
                     </table>
                 </div>
+            </div>
 
-                {/* Pagination */}
-                {totalPages > 1 && (
-                    <div className="px-4 py-3 border-t border-gray-200 flex items-center justify-between">
-                        <p className="text-sm text-gray-500">
-                            Menampilkan {(currentPage - 1) * itemsPerPage + 1} - {Math.min(currentPage * itemsPerPage, totalItems)} dari {totalItems} produk
-                        </p>
-                        <div className="flex items-center gap-2">
-                            <button
-                                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                                disabled={currentPage === 1}
-                                className="p-2 hover:bg-gray-100 rounded-lg disabled:opacity-50"
-                            >
-                                <ChevronLeft className="h-4 w-4" />
-                            </button>
-                            {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-                                <button
-                                    key={page}
-                                    onClick={() => setCurrentPage(page)}
-                                    className={`px-3 py-1 rounded-lg text-sm font-medium ${currentPage === page
-                                            ? 'bg-primary-500 text-white'
-                                            : 'hover:bg-gray-100 text-gray-700'
-                                        }`}
-                                >
-                                    {page}
-                                </button>
-                            ))}
-                            <button
-                                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                                disabled={currentPage === totalPages}
-                                className="p-2 hover:bg-gray-100 rounded-lg disabled:opacity-50"
-                            >
-                                <ChevronRight className="h-4 w-4" />
-                            </button>
-                        </div>
-                    </div>
-                )}
+            {/* Pagination - Responsive */}
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                <p className="text-sm text-gray-500 order-2 sm:order-1">
+                    Menampilkan 1-4 dari 4 produk
+                </p>
+                <div className="flex items-center gap-2 order-1 sm:order-2">
+                    <button className="btn-secondary px-3 py-2 text-sm" disabled>
+                        Prev
+                    </button>
+                    <button className="btn-primary px-3 py-2 text-sm">1</button>
+                    <button className="btn-secondary px-3 py-2 text-sm">
+                        Next
+                    </button>
+                </div>
             </div>
         </div>
     );

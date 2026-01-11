@@ -77,6 +77,44 @@
   .table-cell {
     @apply px-4 py-3 text-sm text-gray-900 border-b border-gray-100;
   }
+
+  /* Responsive table container */
+  .table-responsive {
+    @apply overflow-x-auto -mx-4 sm:mx-0;
+  }
+
+  .table-responsive table {
+    @apply min-w-[640px] w-full;
+  }
+
+  /* Mobile card layout for tables */
+  .mobile-card {
+    @apply block sm:hidden;
+  }
+
+  .desktop-table {
+    @apply hidden sm:block;
+  }
+
+  /* Page header - responsive */
+  .page-header {
+    @apply flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6;
+  }
+
+  /* Mobile filter section */
+  .filter-section {
+    @apply flex flex-col sm:flex-row flex-wrap gap-3;
+  }
+
+  /* Stats grid - responsive */
+  .stats-grid {
+    @apply grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4;
+  }
+
+  /* Mobile action buttons */
+  .action-buttons {
+    @apply flex flex-wrap gap-2;
+  }
 }
 
 /* Custom scrollbar */

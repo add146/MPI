@@ -1,17 +1,6 @@
-import { useQuery } from '@tanstack/react-query';
-import { useAuthStore } from '@/stores/auth';
-import { reportsApi, transactionsApi, rawMaterialsApi } from '@/lib/api';
-import { formatCurrency, formatNumber } from '@/lib/utils';
-import {
-    TrendingUp,
-    TrendingDown,
-    DollarSign,
-    ShoppingCart,
-    AlertTriangle,
-    Users,
-    ArrowRight,
-} from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { DollarSign, TrendingUp, Package, AlertTriangle, ShoppingCart, Users } from 'lucide-react';
+import { formatCurrency } from '@/lib/utils';
 import {
     LineChart,
     Line,
@@ -26,142 +15,102 @@ import {
 } from 'recharts';
 
 export default function DashboardPage() {
-    const { currentOutletId } = useAuthStore();
+    const [loading, setLoading] = useState(true);
 
-    // Fetch sales summary
-    const { data: salesData } = useQuery({
-        queryKey: ['sales-summary', currentOutletId],
-        queryFn: () => reportsApi.getSales(currentOutletId!),
-        enabled: !!currentOutletId,
-    });
+    useEffect(() => {
+        // Simulate loading
+        const timer = setTimeout(() => setLoading(false), 500);
+        return () => clearTimeout(timer);
+    }, []);
 
-    // Fetch P&L
-    const { data: plData } = useQuery({
-        queryKey: ['profit-loss', currentOutletId],
-        queryFn: () => reportsApi.getProfitLoss(currentOutletId!),
-        enabled: !!currentOutletId,
-    });
-
-    // Fetch low stock alerts
-    const { data: lowStockData } = useQuery({
-        queryKey: ['low-stock', currentOutletId],
-        queryFn: () => rawMaterialsApi.getLowStock(currentOutletId!),
-        enabled: !!currentOutletId,
-    });
-
-    // Fetch balance sheet for inventory
-    const { data: balanceData } = useQuery({
-        queryKey: ['balance-sheet', currentOutletId],
-        queryFn: () => reportsApi.getBalanceSheet(currentOutletId!),
-        enabled: !!currentOutletId,
-    });
-
-    const stats = [
-        {
-            name: 'Total Penjualan',
-            value: formatCurrency(salesData?.data?.summary?.totalSales || 0),
-            change: '+12.5%',
-            trend: 'up',
-            icon: DollarSign,
-            color: 'bg-green-500',
-        },
-        {
-            name: 'Laba Bersih',
-            value: formatCurrency(plData?.data?.netProfit || 0),
-            change: '+8.2%',
-            trend: 'up',
-            icon: TrendingUp,
-            color: 'bg-blue-500',
-        },
-        {
-            name: 'Stok Menipis',
-            value: `${lowStockData?.data?.length || 0} Item`,
-            change: 'Perhatian',
-            trend: 'warning',
-            icon: AlertTriangle,
-            color: 'bg-amber-500',
-        },
-        {
-            name: 'Total Transaksi',
-            value: formatNumber(salesData?.data?.summary?.totalTransactions || 0),
-            change: '+4.1%',
-            trend: 'up',
-            icon: ShoppingCart,
-            color: 'bg-purple-500',
-        },
+    // Sample chart data
+    const dailySales = [
+        { date: 'Sen', sales: 2500000 },
+        { date: 'Sel', sales: 3200000 },
+        { date: 'Rab', sales: 2800000 },
+        { date: 'Kam', sales: 4100000 },
+        { date: 'Jum', sales: 3800000 },
+        { date: 'Sab', sales: 5200000 },
+        { date: 'Min', sales: 4500000 },
     ];
 
     const inventoryData = [
-        { name: 'Bahan Baku', value: balanceData?.data?.assets?.inventory?.rawMaterials || 0 },
-        { name: 'Produk Jadi', value: balanceData?.data?.assets?.inventory?.finishedGoods || 0 },
+        { name: 'Produk Jadi', value: 35000000 },
+        { name: 'Bahan Baku', value: 25000000 },
     ];
 
-    const COLORS = ['#10B981', '#3B82F6'];
+    const COLORS = ['#14B8A6', '#F59E0B'];
+
+    const lowStockItems = [
+        { name: 'Kopi Arabica', stock: 3, minStock: 5, unit: 'kg' },
+        { name: 'Gula Pasir', stock: 8, minStock: 15, unit: 'kg' },
+        { name: 'Donat Coklat', stock: 5, minStock: 10, unit: 'pcs' },
+    ];
+
+    const topProducts = [
+        { name: 'Kopi Susu Aren', qty: 156, revenue: 2808000 },
+        { name: 'Roti Tawar', qty: 124, revenue: 2232000 },
+        { name: 'Donat Coklat', qty: 98, revenue: 784000 },
+    ];
+
+    const stats = [
+        { label: 'Penjualan Hari Ini', value: formatCurrency(5200000), icon: DollarSign, color: 'text-green-600', bg: 'bg-green-100' },
+        { label: 'Transaksi', value: '48', icon: ShoppingCart, color: 'text-blue-600', bg: 'bg-blue-100' },
+        { label: 'Pelanggan Baru', value: '12', icon: Users, color: 'text-purple-600', bg: 'bg-purple-100' },
+        { label: 'Laba Bersih', value: formatCurrency(1250000), icon: TrendingUp, color: 'text-amber-600', bg: 'bg-amber-100' },
+    ];
+
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center h-64">
+                <div className="animate-spin h-8 w-8 border-4 border-primary-500 border-t-transparent rounded-full"></div>
+            </div>
+        );
+    }
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
             {/* Header */}
             <div>
-                <h1 className="text-2xl font-bold text-gray-900">Dashboard Overview</h1>
-                <p className="text-gray-500">Selamat datang! Berikut ringkasan bisnis Anda hari ini.</p>
+                <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Dashboard</h1>
+                <p className="text-sm text-gray-500">Ringkasan bisnis hari ini</p>
             </div>
 
-            {/* Stats Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* Stats Cards - Responsive Grid */}
+            <div className="stats-grid">
                 {stats.map((stat) => (
-                    <div key={stat.name} className="card p-5">
-                        <div className="flex items-center justify-between">
-                            <div className={`h-10 w-10 rounded-lg ${stat.color} flex items-center justify-center`}>
-                                <stat.icon className="h-5 w-5 text-white" />
+                    <div key={stat.label} className="card p-3 sm:p-4">
+                        <div className="flex items-center gap-3">
+                            <div className={`h-10 w-10 sm:h-12 sm:w-12 rounded-xl ${stat.bg} flex items-center justify-center flex-shrink-0`}>
+                                <stat.icon className={`h-5 w-5 sm:h-6 sm:w-6 ${stat.color}`} />
                             </div>
-                            <span className={`text-sm font-medium ${stat.trend === 'up' ? 'text-green-600' :
-                                    stat.trend === 'down' ? 'text-red-600' :
-                                        'text-amber-600'
-                                }`}>
-                                {stat.change}
-                            </span>
-                        </div>
-                        <div className="mt-4">
-                            <h3 className="text-sm text-gray-500">{stat.name}</h3>
-                            <p className="text-2xl font-bold text-gray-900 mt-1">{stat.value}</p>
+                            <div className="min-w-0">
+                                <p className="text-xs sm:text-sm text-gray-500 truncate">{stat.label}</p>
+                                <p className="text-base sm:text-xl font-bold text-gray-900">{stat.value}</p>
+                            </div>
                         </div>
                     </div>
                 ))}
             </div>
 
-            {/* Charts Row */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Charts Row - Stack on mobile */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                 {/* Sales Chart */}
-                <div className="lg:col-span-2 card p-5">
-                    <div className="flex items-center justify-between mb-4">
-                        <h3 className="font-semibold text-gray-900">Grafik Penjualan</h3>
-                        <span className="text-sm text-gray-500">7 hari terakhir</span>
-                    </div>
-                    <div className="h-64">
+                <div className="card p-4 sm:p-5">
+                    <h3 className="font-semibold text-gray-900 mb-4">Penjualan Mingguan</h3>
+                    <div className="h-48 sm:h-64">
                         <ResponsiveContainer width="100%" height="100%">
-                            <LineChart data={[
-                                { day: 'Sen', value: 1500000 },
-                                { day: 'Sel', value: 2200000 },
-                                { day: 'Rab', value: 1800000 },
-                                { day: 'Kam', value: 2500000 },
-                                { day: 'Jum', value: 3000000 },
-                                { day: 'Sab', value: 2800000 },
-                                { day: 'Min', value: 2000000 },
-                            ]}>
-                                <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-                                <XAxis dataKey="day" stroke="#94a3b8" fontSize={12} />
-                                <YAxis stroke="#94a3b8" fontSize={12} tickFormatter={(v) => `${v / 1000000}jt`} />
-                                <Tooltip
-                                    formatter={(value: number) => formatCurrency(value)}
-                                    contentStyle={{ borderRadius: '8px', border: '1px solid #e2e8f0' }}
-                                />
+                            <LineChart data={dailySales}>
+                                <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
+                                <XAxis dataKey="date" tick={{ fontSize: 12 }} />
+                                <YAxis tick={{ fontSize: 12 }} tickFormatter={(v) => `${v / 1000000}jt`} />
+                                <Tooltip formatter={(value: number) => formatCurrency(value)} />
                                 <Line
                                     type="monotone"
-                                    dataKey="value"
-                                    stroke="#10B981"
+                                    dataKey="sales"
+                                    stroke="#14B8A6"
                                     strokeWidth={2}
-                                    dot={{ fill: '#10B981', strokeWidth: 2, r: 4 }}
-                                    activeDot={{ r: 6 }}
+                                    dot={{ fill: '#14B8A6' }}
                                 />
                             </LineChart>
                         </ResponsiveContainer>
@@ -169,9 +118,9 @@ export default function DashboardPage() {
                 </div>
 
                 {/* Inventory Pie Chart */}
-                <div className="card p-5">
+                <div className="card p-4 sm:p-5">
                     <h3 className="font-semibold text-gray-900 mb-4">Nilai Inventory</h3>
-                    <div className="h-48">
+                    <div className="h-48 sm:h-64 flex items-center justify-center">
                         <ResponsiveContainer width="100%" height="100%">
                             <PieChart>
                                 <Pie
@@ -179,11 +128,11 @@ export default function DashboardPage() {
                                     cx="50%"
                                     cy="50%"
                                     innerRadius={50}
-                                    outerRadius={70}
+                                    outerRadius={80}
                                     paddingAngle={5}
                                     dataKey="value"
                                 >
-                                    {inventoryData.map((_, index) => (
+                                    {inventoryData.map((entry, index) => (
                                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                                     ))}
                                 </Pie>
@@ -191,87 +140,63 @@ export default function DashboardPage() {
                             </PieChart>
                         </ResponsiveContainer>
                     </div>
-                    <div className="flex justify-center gap-4 mt-4">
-                        {inventoryData.map((item, index) => (
+                    <div className="flex justify-center gap-4 sm:gap-6 mt-2">
+                        {inventoryData.map((item, idx) => (
                             <div key={item.name} className="flex items-center gap-2">
-                                <div className={`h-3 w-3 rounded-full`} style={{ backgroundColor: COLORS[index] }} />
-                                <span className="text-sm text-gray-600">{item.name}</span>
+                                <div className="h-3 w-3 rounded-full" style={{ backgroundColor: COLORS[idx] }}></div>
+                                <span className="text-xs sm:text-sm text-gray-600">{item.name}</span>
                             </div>
                         ))}
-                    </div>
-                    <div className="text-center mt-4">
-                        <p className="text-2xl font-bold text-gray-900">
-                            {formatCurrency(balanceData?.data?.assets?.inventory?.total || 0)}
-                        </p>
-                        <p className="text-sm text-gray-500">Total Nilai</p>
                     </div>
                 </div>
             </div>
 
-            {/* Bottom Row */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Bottom Row - Stack on mobile */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                 {/* Low Stock Alert */}
-                <div className="card p-5">
-                    <div className="flex items-center justify-between mb-4">
-                        <h3 className="font-semibold text-gray-900 flex items-center gap-2">
-                            <AlertTriangle className="h-5 w-5 text-amber-500" />
-                            Peringatan Stok Menipis
-                        </h3>
-                        <Link to="/catalog/raw-materials" className="text-sm text-primary-600 hover:text-primary-700 flex items-center gap-1">
-                            Lihat Semua <ArrowRight className="h-4 w-4" />
-                        </Link>
+                <div className="card overflow-hidden">
+                    <div className="p-4 sm:p-5 border-b border-gray-200 flex items-center gap-2">
+                        <AlertTriangle className="h-5 w-5 text-amber-500" />
+                        <h3 className="font-semibold text-gray-900">Stok Menipis</h3>
                     </div>
-                    <div className="space-y-3">
-                        {lowStockData?.data?.slice(0, 5).map((item: any) => (
-                            <div key={item.id} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-0">
+                    <div className="divide-y divide-gray-100">
+                        {lowStockItems.map((item) => (
+                            <div key={item.name} className="px-4 sm:px-5 py-3 flex items-center justify-between">
                                 <div>
-                                    <p className="font-medium text-gray-900">{item.name}</p>
-                                    <p className="text-sm text-gray-500">SKU: {item.sku || '-'}</p>
+                                    <p className="font-medium text-gray-900 text-sm sm:text-base">{item.name}</p>
+                                    <p className="text-xs sm:text-sm text-gray-500">Min: {item.minStock} {item.unit}</p>
                                 </div>
-                                <div className="text-right">
-                                    <p className="font-medium text-red-600">{item.stockQty} {item.unit}</p>
-                                    <p className="text-sm text-gray-500">Min: {item.minStock}</p>
-                                </div>
+                                <span className="badge badge-danger text-xs">
+                                    {item.stock} {item.unit}
+                                </span>
                             </div>
-                        )) || (
-                                <p className="text-sm text-gray-500 text-center py-4">
-                                    Tidak ada stok yang menipis
-                                </p>
-                            )}
+                        ))}
                     </div>
                 </div>
 
                 {/* Top Products */}
-                <div className="card p-5">
-                    <div className="flex items-center justify-between mb-4">
+                <div className="card overflow-hidden">
+                    <div className="p-4 sm:p-5 border-b border-gray-200 flex items-center gap-2">
+                        <Package className="h-5 w-5 text-primary-500" />
                         <h3 className="font-semibold text-gray-900">Produk Terlaris</h3>
-                        <Link to="/reports" className="text-sm text-primary-600 hover:text-primary-700 flex items-center gap-1">
-                            Lihat Laporan <ArrowRight className="h-4 w-4" />
-                        </Link>
                     </div>
-                    <div className="space-y-3">
-                        {salesData?.data?.topProducts?.slice(0, 5).map((product: any, index: number) => (
-                            <div key={product.id} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-0">
+                    <div className="divide-y divide-gray-100">
+                        {topProducts.map((item, idx) => (
+                            <div key={item.name} className="px-4 sm:px-5 py-3 flex items-center justify-between">
                                 <div className="flex items-center gap-3">
-                                    <span className={`h-6 w-6 rounded-full flex items-center justify-center text-xs font-medium ${index === 0 ? 'bg-amber-100 text-amber-700' :
-                                            index === 1 ? 'bg-gray-100 text-gray-700' :
-                                                index === 2 ? 'bg-orange-100 text-orange-700' :
-                                                    'bg-gray-50 text-gray-500'
-                                        }`}>
-                                        {index + 1}
+                                    <span className="h-7 w-7 sm:h-8 sm:w-8 rounded-full bg-primary-100 text-primary-600 font-bold text-xs sm:text-sm flex items-center justify-center">
+                                        {idx + 1}
                                     </span>
-                                    <p className="font-medium text-gray-900">{product.name}</p>
+                                    <div>
+                                        <p className="font-medium text-gray-900 text-sm sm:text-base">{item.name}</p>
+                                        <p className="text-xs sm:text-sm text-gray-500">{item.qty} terjual</p>
+                                    </div>
                                 </div>
-                                <div className="text-right">
-                                    <p className="font-medium text-gray-900">{formatCurrency(product.revenue)}</p>
-                                    <p className="text-sm text-gray-500">{product.quantity} terjual</p>
-                                </div>
+                                <span className="font-semibold text-gray-900 text-sm sm:text-base">
+                                    {formatCurrency(item.revenue)}
+                                </span>
                             </div>
-                        )) || (
-                                <p className="text-sm text-gray-500 text-center py-4">
-                                    Belum ada data penjualan
-                                </p>
-                            )}
+                        ))}
                     </div>
                 </div>
             </div>

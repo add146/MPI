@@ -1,125 +1,134 @@
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { useAuthStore } from '@/stores/auth';
-import { customersApi } from '@/lib/api';
+import { Plus, Search, Download, Eye, Edit, Users, Phone, Mail, Star } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
-import {
-    Plus,
-    Search,
-    Download,
-    Upload,
-    Edit,
-    Trash2,
-    Eye,
-    Users,
-    ChevronLeft,
-    ChevronRight,
-    Star,
-    Phone,
-    Mail,
-} from 'lucide-react';
 
 export default function CustomersPage() {
-    const { currentOutletId } = useAuthStore();
     const [search, setSearch] = useState('');
     const [level, setLevel] = useState('');
-    const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 10;
 
-    const { data, isLoading } = useQuery({
-        queryKey: ['customers', currentOutletId],
-        queryFn: () => customersApi.getAll(currentOutletId!),
-        enabled: !!currentOutletId,
-    });
+    // Sample data
+    const customers = [
+        { id: 1, name: 'Budi Santoso', phone: '08123456789', email: 'budi@email.com', level: 'Reseller', points: 1250, totalSpent: 5850000 },
+        { id: 2, name: 'Siti Aminah', phone: '08234567890', email: 'siti@email.com', level: 'Agen', points: 3420, totalSpent: 15200000 },
+        { id: 3, name: 'Ahmad Dahlan', phone: '08345678901', email: 'ahmad@email.com', level: 'Regular', points: 450, totalSpent: 1250000 },
+        { id: 4, name: 'Maria Garcia', phone: '08456789012', email: 'maria@email.com', level: 'Distributor', points: 8200, totalSpent: 45800000 },
+    ];
 
-    const customers = data?.data || [];
-    const filteredCustomers = customers.filter((c: any) => {
-        if (search && !c.name.toLowerCase().includes(search.toLowerCase())) return false;
-        return true;
-    });
-    const totalItems = filteredCustomers.length;
-    const totalPages = Math.ceil(totalItems / itemsPerPage);
-    const paginatedCustomers = filteredCustomers.slice(
-        (currentPage - 1) * itemsPerPage,
-        currentPage * itemsPerPage
-    );
-
-    const getLevelBadgeColor = (levelName: string) => {
-        switch (levelName?.toLowerCase()) {
-            case 'retail': return 'bg-gray-100 text-gray-700';
-            case 'reseller': return 'bg-blue-100 text-blue-700';
-            case 'agen': return 'bg-purple-100 text-purple-700';
-            case 'distributor': return 'bg-amber-100 text-amber-700';
+    const getLevelColor = (level: string) => {
+        switch (level) {
+            case 'Distributor': return 'bg-purple-100 text-purple-700';
+            case 'Agen': return 'bg-blue-100 text-blue-700';
+            case 'Reseller': return 'bg-green-100 text-green-700';
             default: return 'bg-gray-100 text-gray-700';
         }
     };
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
             {/* Header */}
-            <div className="flex items-center justify-between">
+            <div className="page-header">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900">Daftar Pelanggan</h1>
-                    <p className="text-gray-500">Kelola pelanggan dan lihat riwayat transaksi mereka</p>
+                    <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Daftar Pelanggan</h1>
+                    <p className="text-sm text-gray-500">Kelola data pelanggan dan membership</p>
                 </div>
-                <div className="flex items-center gap-2">
-                    <button className="btn-secondary">
-                        <Upload className="h-4 w-4" />
-                        Import
-                    </button>
-                    <button className="btn-secondary">
+                <div className="action-buttons">
+                    <button className="btn-secondary text-sm">
                         <Download className="h-4 w-4" />
-                        Export
+                        <span className="hidden sm:inline">Export</span>
                     </button>
-                    <button className="btn-primary">
+                    <button className="btn-primary text-sm">
                         <Plus className="h-4 w-4" />
-                        Tambah Pelanggan
+                        <span className="hidden sm:inline">Tambah</span> Pelanggan
                     </button>
                 </div>
             </div>
 
-            {/* Filter Section */}
-            <div className="card p-4">
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <div className="md:col-span-2">
-                        <div className="relative">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                            <input
-                                type="text"
-                                placeholder="Cari pelanggan berdasarkan nama, telepon, atau email..."
-                                value={search}
-                                onChange={(e) => setSearch(e.target.value)}
-                                className="input pl-10"
-                            />
+            {/* Filter */}
+            <div className="card p-3 sm:p-4">
+                <div className="filter-section">
+                    <div className="relative flex-1 min-w-0">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                        <input
+                            type="text"
+                            placeholder="Cari pelanggan..."
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            className="input pl-10"
+                        />
+                    </div>
+                    <select
+                        value={level}
+                        onChange={(e) => setLevel(e.target.value)}
+                        className="input w-full sm:w-auto"
+                    >
+                        <option value="">Semua Level</option>
+                        <option value="regular">Regular</option>
+                        <option value="reseller">Reseller</option>
+                        <option value="agen">Agen</option>
+                        <option value="distributor">Distributor</option>
+                    </select>
+                </div>
+            </div>
+
+            {/* Mobile Card View */}
+            <div className="mobile-card space-y-3">
+                {customers.map((customer) => (
+                    <div key={customer.id} className="card p-4">
+                        <div className="flex items-start justify-between mb-3">
+                            <div className="flex items-center gap-3">
+                                <div className="h-10 w-10 rounded-full bg-primary-100 flex items-center justify-center flex-shrink-0">
+                                    <span className="text-primary-600 font-bold">
+                                        {customer.name.charAt(0)}
+                                    </span>
+                                </div>
+                                <div>
+                                    <h3 className="font-medium text-gray-900">{customer.name}</h3>
+                                    <span className={`badge text-xs ${getLevelColor(customer.level)}`}>
+                                        {customer.level}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="space-y-2 text-sm mb-3">
+                            <div className="flex items-center gap-2 text-gray-600">
+                                <Phone className="h-4 w-4" />
+                                {customer.phone}
+                            </div>
+                            <div className="flex items-center gap-2 text-gray-600">
+                                <Mail className="h-4 w-4" />
+                                {customer.email}
+                            </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2 text-sm mb-3">
+                            <div className="bg-amber-50 rounded-lg p-2 text-center">
+                                <p className="text-gray-600 text-xs">Poin</p>
+                                <p className="font-bold text-amber-600 flex items-center justify-center gap-1">
+                                    <Star className="h-3 w-3" />
+                                    {customer.points.toLocaleString()}
+                                </p>
+                            </div>
+                            <div className="bg-green-50 rounded-lg p-2 text-center">
+                                <p className="text-gray-600 text-xs">Total Belanja</p>
+                                <p className="font-bold text-green-600">{formatCurrency(customer.totalSpent)}</p>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-2 pt-3 border-t border-gray-100">
+                            <button className="flex-1 btn-secondary py-2 text-sm">
+                                <Eye className="h-4 w-4" />
+                                Detail
+                            </button>
+                            <button className="flex-1 btn-secondary py-2 text-sm">
+                                <Edit className="h-4 w-4" />
+                                Edit
+                            </button>
                         </div>
                     </div>
-                    <div>
-                        <select
-                            value={level}
-                            onChange={(e) => setLevel(e.target.value)}
-                            className="input"
-                        >
-                            <option value="">Semua Level</option>
-                            <option value="retail">Retail</option>
-                            <option value="reseller">Reseller</option>
-                            <option value="agen">Agen</option>
-                            <option value="distributor">Distributor</option>
-                        </select>
-                    </div>
-                    <div>
-                        <select className="input">
-                            <option value="">Semua Kota</option>
-                            <option value="jakarta">Jakarta</option>
-                            <option value="bandung">Bandung</option>
-                            <option value="surabaya">Surabaya</option>
-                        </select>
-                    </div>
-                </div>
+                ))}
             </div>
 
-            {/* Table */}
-            <div className="card overflow-hidden">
-                <div className="overflow-x-auto">
+            {/* Desktop Table View */}
+            <div className="desktop-table card overflow-hidden">
+                <div className="table-responsive">
                     <table className="w-full">
                         <thead className="bg-gray-50 border-b border-gray-200">
                             <tr>
@@ -133,7 +142,7 @@ export default function CustomersPage() {
                                     Level
                                 </th>
                                 <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                                    Total Poin
+                                    Poin
                                 </th>
                                 <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                                     Total Belanja
@@ -144,124 +153,69 @@ export default function CustomersPage() {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-100">
-                            {isLoading ? (
-                                <tr>
-                                    <td colSpan={6} className="px-4 py-8 text-center text-gray-500">
-                                        Memuat data...
-                                    </td>
-                                </tr>
-                            ) : paginatedCustomers.length === 0 ? (
-                                <tr>
-                                    <td colSpan={6} className="px-4 py-8 text-center text-gray-500">
-                                        <Users className="h-12 w-12 mx-auto text-gray-300 mb-2" />
-                                        <p>Belum ada pelanggan</p>
-                                        <p className="text-sm">Klik tombol "Tambah Pelanggan" untuk menambah pelanggan baru</p>
-                                    </td>
-                                </tr>
-                            ) : (
-                                paginatedCustomers.map((customer: any) => (
-                                    <tr key={customer.id} className="hover:bg-gray-50">
-                                        <td className="px-4 py-3">
-                                            <div className="flex items-center gap-3">
-                                                <div className="h-10 w-10 rounded-full bg-primary-100 flex items-center justify-center">
-                                                    <span className="text-primary-600 font-medium">
-                                                        {customer.name?.charAt(0).toUpperCase()}
-                                                    </span>
-                                                </div>
-                                                <div>
-                                                    <p className="font-medium text-gray-900">{customer.name}</p>
-                                                    <p className="text-sm text-gray-500">{customer.address || '-'}</p>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td className="px-4 py-3">
-                                            <div className="space-y-1">
-                                                {customer.phone && (
-                                                    <div className="flex items-center gap-1.5 text-sm text-gray-600">
-                                                        <Phone className="h-3.5 w-3.5" />
-                                                        {customer.phone}
-                                                    </div>
-                                                )}
-                                                {customer.email && (
-                                                    <div className="flex items-center gap-1.5 text-sm text-gray-600">
-                                                        <Mail className="h-3.5 w-3.5" />
-                                                        {customer.email}
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </td>
-                                        <td className="px-4 py-3">
-                                            <span className={`badge ${getLevelBadgeColor(customer.level?.name)}`}>
-                                                {customer.level?.name || 'Retail'}
-                                            </span>
-                                        </td>
-                                        <td className="px-4 py-3">
-                                            <div className="flex items-center gap-1">
-                                                <Star className="h-4 w-4 text-amber-400 fill-amber-400" />
-                                                <span className="font-medium text-gray-900">
-                                                    {customer.totalPoints?.toLocaleString() || 0}
+                            {customers.map((customer) => (
+                                <tr key={customer.id} className="hover:bg-gray-50">
+                                    <td className="px-4 py-3">
+                                        <div className="flex items-center gap-3">
+                                            <div className="h-10 w-10 rounded-full bg-primary-100 flex items-center justify-center">
+                                                <span className="text-primary-600 font-bold">
+                                                    {customer.name.charAt(0)}
                                                 </span>
                                             </div>
-                                        </td>
-                                        <td className="px-4 py-3 text-sm font-medium text-gray-900">
-                                            {formatCurrency(customer.lifetimeSpent || 0)}
-                                        </td>
-                                        <td className="px-4 py-3">
-                                            <div className="flex items-center justify-center gap-2">
-                                                <button className="p-1.5 hover:bg-gray-100 rounded-lg" title="Lihat Detail">
-                                                    <Eye className="h-4 w-4 text-gray-500" />
-                                                </button>
-                                                <button className="p-1.5 hover:bg-gray-100 rounded-lg" title="Edit">
-                                                    <Edit className="h-4 w-4 text-gray-500" />
-                                                </button>
-                                                <button className="p-1.5 hover:bg-red-50 rounded-lg" title="Hapus">
-                                                    <Trash2 className="h-4 w-4 text-red-500" />
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))
-                            )}
+                                            <span className="font-medium text-gray-900">{customer.name}</span>
+                                        </div>
+                                    </td>
+                                    <td className="px-4 py-3">
+                                        <div className="text-sm">
+                                            <p className="text-gray-900">{customer.phone}</p>
+                                            <p className="text-gray-500">{customer.email}</p>
+                                        </div>
+                                    </td>
+                                    <td className="px-4 py-3">
+                                        <span className={`badge ${getLevelColor(customer.level)}`}>
+                                            {customer.level}
+                                        </span>
+                                    </td>
+                                    <td className="px-4 py-3">
+                                        <span className="flex items-center gap-1 text-amber-600 font-medium">
+                                            <Star className="h-4 w-4" />
+                                            {customer.points.toLocaleString()}
+                                        </span>
+                                    </td>
+                                    <td className="px-4 py-3 font-medium text-gray-900">
+                                        {formatCurrency(customer.totalSpent)}
+                                    </td>
+                                    <td className="px-4 py-3">
+                                        <div className="flex items-center justify-center gap-2">
+                                            <button className="p-1.5 hover:bg-gray-100 rounded-lg">
+                                                <Eye className="h-4 w-4 text-gray-500" />
+                                            </button>
+                                            <button className="p-1.5 hover:bg-gray-100 rounded-lg">
+                                                <Edit className="h-4 w-4 text-gray-500" />
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))}
                         </tbody>
                     </table>
                 </div>
+            </div>
 
-                {/* Pagination */}
-                {totalPages > 1 && (
-                    <div className="px-4 py-3 border-t border-gray-200 flex items-center justify-between">
-                        <p className="text-sm text-gray-500">
-                            Menampilkan {(currentPage - 1) * itemsPerPage + 1} - {Math.min(currentPage * itemsPerPage, totalItems)} dari {totalItems} pelanggan
-                        </p>
-                        <div className="flex items-center gap-2">
-                            <button
-                                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                                disabled={currentPage === 1}
-                                className="p-2 hover:bg-gray-100 rounded-lg disabled:opacity-50"
-                            >
-                                <ChevronLeft className="h-4 w-4" />
-                            </button>
-                            {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-                                <button
-                                    key={page}
-                                    onClick={() => setCurrentPage(page)}
-                                    className={`px-3 py-1 rounded-lg text-sm font-medium ${currentPage === page
-                                            ? 'bg-primary-500 text-white'
-                                            : 'hover:bg-gray-100 text-gray-700'
-                                        }`}
-                                >
-                                    {page}
-                                </button>
-                            ))}
-                            <button
-                                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                                disabled={currentPage === totalPages}
-                                className="p-2 hover:bg-gray-100 rounded-lg disabled:opacity-50"
-                            >
-                                <ChevronRight className="h-4 w-4" />
-                            </button>
-                        </div>
-                    </div>
-                )}
+            {/* Pagination */}
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                <p className="text-sm text-gray-500 order-2 sm:order-1">
+                    Menampilkan 1-4 dari 4 pelanggan
+                </p>
+                <div className="flex items-center gap-2 order-1 sm:order-2">
+                    <button className="btn-secondary px-3 py-2 text-sm" disabled>
+                        Prev
+                    </button>
+                    <button className="btn-primary px-3 py-2 text-sm">1</button>
+                    <button className="btn-secondary px-3 py-2 text-sm">
+                        Next
+                    </button>
+                </div>
             </div>
         </div>
     );
