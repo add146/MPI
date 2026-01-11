@@ -561,7 +561,7 @@ mpi/
 | **Primary Color** | Teal (#0D9488) - Trust, professional |
 | **Secondary** | Amber (#F59E0B) - Highlight, promo |
 | **Background** | Slate-50 (#F8FAFC) |
-| **Sidebar** | Slate-900 (#0F172A) |
+| **Sidebar** | White (#FFFFFF) with border |
 | **Typography** | Inter / Plus Jakarta Sans |
 | **Border Radius** | 8px (cards), 6px (buttons) |
 
