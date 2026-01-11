@@ -7,15 +7,50 @@ import DashboardLayout from '@/layouts/DashboardLayout';
 // Pages
 import LoginPage from '@/pages/LoginPage';
 import DashboardPage from '@/pages/DashboardPage';
+
+// Catalog
 import ProductsPage from '@/pages/catalog/ProductsPage';
 import RawMaterialsPage from '@/pages/catalog/RawMaterialsPage';
+import CategoriesPage from '@/pages/catalog/CategoriesPage';
+import BrandsPage from '@/pages/catalog/BrandsPage';
 import RecipesPage from '@/pages/catalog/RecipesPage';
 import BundlesPage from '@/pages/catalog/BundlesPage';
-import CustomersPage from '@/pages/customers/CustomersPage';
+
+// Pricing
 import PriceLevelsPage from '@/pages/pricing/PriceLevelsPage';
+import ProductPricesPage from '@/pages/pricing/ProductPricesPage';
+import PointsConfigPage from '@/pages/pricing/PointsConfigPage';
+
+// Customers
+import CustomersPage from '@/pages/customers/CustomersPage';
+import CustomerLevelsPage from '@/pages/customers/CustomerLevelsPage';
+import PointsHistoryPage from '@/pages/customers/PointsHistoryPage';
+
+// Inventory
+import InventoryProductsPage from '@/pages/inventory/InventoryProductsPage';
+import InventoryMaterialsPage from '@/pages/inventory/InventoryMaterialsPage';
+import PurchaseOrdersPage from '@/pages/inventory/PurchaseOrdersPage';
+import TransfersPage from '@/pages/inventory/TransfersPage';
+import AdjustmentsPage from '@/pages/inventory/AdjustmentsPage';
+
+// Transactions
 import TransactionsPage from '@/pages/transactions/TransactionsPage';
-import ReportsPage from '@/pages/reports/ReportsPage';
+import ShiftsPage from '@/pages/transactions/ShiftsPage';
 import POSPage from '@/pages/pos/POSPage';
+
+// Reports
+import SalesReportPage from '@/pages/reports/SalesReportPage';
+import BalanceSheetPage from '@/pages/reports/BalanceSheetPage';
+import ProfitLossPage from '@/pages/reports/ProfitLossPage';
+import HppReportPage from '@/pages/reports/HppReportPage';
+import ExportPage from '@/pages/reports/ExportPage';
+
+// Settings
+import AccountSettingsPage from '@/pages/settings/AccountSettingsPage';
+import OutletSettingsPage from '@/pages/settings/OutletSettingsPage';
+import EmployeesPage from '@/pages/settings/EmployeesPage';
+import PaymentMethodsPage from '@/pages/settings/PaymentMethodsPage';
+import TaxesPage from '@/pages/settings/TaxesPage';
 
 // Protected Route wrapper
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -45,27 +80,62 @@ export default function App() {
             >
                 <Route index element={<DashboardPage />} />
 
-                {/* Catalog */}
+                {/* Katalog */}
                 <Route path="catalog">
                     <Route path="products" element={<ProductsPage />} />
                     <Route path="raw-materials" element={<RawMaterialsPage />} />
+                    <Route path="categories" element={<CategoriesPage />} />
+                    <Route path="brands" element={<BrandsPage />} />
                     <Route path="recipes" element={<RecipesPage />} />
                     <Route path="bundles" element={<BundlesPage />} />
                 </Route>
 
-                {/* Pricing */}
+                {/* Harga & Level */}
                 <Route path="pricing">
                     <Route path="levels" element={<PriceLevelsPage />} />
+                    <Route path="products" element={<ProductPricesPage />} />
+                    <Route path="points" element={<PointsConfigPage />} />
                 </Route>
 
-                {/* Customers */}
-                <Route path="customers" element={<CustomersPage />} />
+                {/* Pelanggan */}
+                <Route path="customers">
+                    <Route index element={<CustomersPage />} />
+                    <Route path="levels" element={<CustomerLevelsPage />} />
+                    <Route path="points" element={<PointsHistoryPage />} />
+                </Route>
 
-                {/* Transactions */}
-                <Route path="transactions" element={<TransactionsPage />} />
+                {/* Inventory */}
+                <Route path="inventory">
+                    <Route path="products" element={<InventoryProductsPage />} />
+                    <Route path="raw-materials" element={<InventoryMaterialsPage />} />
+                    <Route path="purchase-orders" element={<PurchaseOrdersPage />} />
+                    <Route path="transfers" element={<TransfersPage />} />
+                    <Route path="adjustments" element={<AdjustmentsPage />} />
+                </Route>
 
-                {/* Reports */}
-                <Route path="reports" element={<ReportsPage />} />
+                {/* Transaksi */}
+                <Route path="transactions">
+                    <Route index element={<TransactionsPage />} />
+                    <Route path="shifts" element={<ShiftsPage />} />
+                </Route>
+
+                {/* Laporan */}
+                <Route path="reports">
+                    <Route path="sales" element={<SalesReportPage />} />
+                    <Route path="balance-sheet" element={<BalanceSheetPage />} />
+                    <Route path="profit-loss" element={<ProfitLossPage />} />
+                    <Route path="hpp" element={<HppReportPage />} />
+                    <Route path="export" element={<ExportPage />} />
+                </Route>
+
+                {/* Pengaturan */}
+                <Route path="settings">
+                    <Route path="account" element={<AccountSettingsPage />} />
+                    <Route path="outlet" element={<OutletSettingsPage />} />
+                    <Route path="employees" element={<EmployeesPage />} />
+                    <Route path="payment-methods" element={<PaymentMethodsPage />} />
+                    <Route path="taxes" element={<TaxesPage />} />
+                </Route>
             </Route>
 
             {/* POS - Full screen */}

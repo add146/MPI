@@ -18,30 +18,103 @@ import {
     Store,
     Menu,
     X,
+    Warehouse,
+    FileSpreadsheet,
+    CreditCard,
+    Building2,
+    UserCog,
+    Coins,
+    History,
+    ShoppingCart,
+    ClipboardList,
+    Clock,
+    TrendingUp,
+    Scale,
+    Calculator,
+    Download,
+    Layers,
 } from 'lucide-react';
 
+// Navigation structure sesuai PRD 6.2
 const navigation = [
-    { name: 'Dashboard', href: '/', icon: LayoutDashboard },
+    {
+        name: 'Dashboard',
+        href: '/',
+        icon: LayoutDashboard,
+    },
     {
         name: 'Katalog',
         icon: Package,
         children: [
             { name: 'Produk Jadi', href: '/catalog/products' },
-            { name: 'Bahan Baku', href: '/catalog/raw-materials' },
-            { name: 'Resep Produksi', href: '/catalog/recipes' },
-            { name: 'Bundle Promo', href: '/catalog/bundles' },
+            { name: 'Bahan Baku', href: '/catalog/raw-materials', isNew: true },
+            { name: 'Kategori', href: '/catalog/categories' },
+            { name: 'Brand', href: '/catalog/brands' },
+            { name: 'Resep Produksi', href: '/catalog/recipes', isNew: true },
+            { name: 'Bundle Promo', href: '/catalog/bundles', isNew: true },
         ],
     },
     {
         name: 'Harga & Level',
         icon: Tags,
+        isNew: true,
         children: [
             { name: 'Price Levels', href: '/pricing/levels' },
+            { name: 'Product Prices', href: '/pricing/products' },
+            { name: 'Points Config', href: '/pricing/points' },
         ],
     },
-    { name: 'Pelanggan', href: '/customers', icon: Users },
-    { name: 'Transaksi', href: '/transactions', icon: Receipt },
-    { name: 'Laporan', href: '/reports', icon: BarChart3 },
+    {
+        name: 'Pelanggan',
+        icon: Users,
+        children: [
+            { name: 'Daftar Pelanggan', href: '/customers' },
+            { name: 'Level Pelanggan', href: '/customers/levels', isNew: true },
+            { name: 'Riwayat Poin', href: '/customers/points', isNew: true },
+        ],
+    },
+    {
+        name: 'Inventory',
+        icon: Warehouse,
+        children: [
+            { name: 'Stok Produk', href: '/inventory/products' },
+            { name: 'Stok Bahan Baku', href: '/inventory/raw-materials', isNew: true },
+            { name: 'Purchase Order', href: '/inventory/purchase-orders' },
+            { name: 'Transfer Stok', href: '/inventory/transfers' },
+            { name: 'Adjustment', href: '/inventory/adjustments' },
+        ],
+    },
+    {
+        name: 'Transaksi',
+        icon: Receipt,
+        children: [
+            { name: 'POS', href: '/pos' },
+            { name: 'Riwayat Transaksi', href: '/transactions' },
+            { name: 'Shift', href: '/transactions/shifts' },
+        ],
+    },
+    {
+        name: 'Laporan',
+        icon: BarChart3,
+        children: [
+            { name: 'Penjualan', href: '/reports/sales' },
+            { name: 'Neraca', href: '/reports/balance-sheet', isNew: true },
+            { name: 'Laba Rugi', href: '/reports/profit-loss', isNew: true },
+            { name: 'HPP', href: '/reports/hpp', isNew: true },
+            { name: 'Export Excel', href: '/reports/export', isNew: true },
+        ],
+    },
+    {
+        name: 'Pengaturan',
+        icon: Settings,
+        children: [
+            { name: 'Akun', href: '/settings/account' },
+            { name: 'Outlet', href: '/settings/outlet' },
+            { name: 'Karyawan', href: '/settings/employees' },
+            { name: 'Metode Pembayaran', href: '/settings/payment-methods' },
+            { name: 'Pajak', href: '/settings/taxes' },
+        ],
+    },
 ];
 
 function NavItem({ item }: { item: typeof navigation[0] }) {
@@ -57,6 +130,9 @@ function NavItem({ item }: { item: typeof navigation[0] }) {
                     <span className="flex items-center gap-3">
                         <item.icon className="h-5 w-5" />
                         {item.name}
+                        {'isNew' in item && item.isNew && (
+                            <span className="ml-1 px-1.5 py-0.5 text-[10px] font-medium bg-amber-500 text-white rounded">MPI</span>
+                        )}
                     </span>
                     <ChevronDown
                         className={cn('h-4 w-4 transition-transform', isOpen && 'rotate-180')}
@@ -69,10 +145,13 @@ function NavItem({ item }: { item: typeof navigation[0] }) {
                                 key={child.href}
                                 to={child.href}
                                 className={({ isActive }) =>
-                                    cn('sidebar-link text-sm', isActive && 'active')
+                                    cn('sidebar-link text-sm flex items-center justify-between', isActive && 'active')
                                 }
                             >
-                                {child.name}
+                                <span>{child.name}</span>
+                                {'isNew' in child && child.isNew && (
+                                    <span className="px-1 py-0.5 text-[9px] font-medium bg-primary-500/30 text-primary-300 rounded">🆕</span>
+                                )}
                             </NavLink>
                         ))}
                     </div>
