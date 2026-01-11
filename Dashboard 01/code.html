@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>MPI - Production &amp; Inventory Analytics</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#0d968b",
+                        "primary-dark": "#0a7a70",
+                        "background-light": "#f6f8f8",
+                        "background-dark": "#102220",
+                        "surface-light": "#ffffff",
+                        "surface-dark": "#1a2c2a",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"],
+                        "sans": ["Inter", "sans-serif"],
+                    },
+                    borderRadius: {"DEFAULT": "0.5rem", "lg": "0.75rem", "xl": "1rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-white transition-colors duration-200">
+<div class="flex h-screen w-full overflow-hidden">
+<!-- Sidebar -->
+<aside class="hidden w-64 flex-col bg-surface-light dark:bg-surface-dark border-r border-slate-200 dark:border-slate-800 md:flex z-20">
+<div class="flex h-16 items-center px-6 border-b border-slate-100 dark:border-slate-800">
+<div class="flex flex-col">
+<h1 class="text-slate-900 dark:text-white text-lg font-bold leading-none">MPI System</h1>
+<p class="text-primary text-xs font-medium mt-1">Management Produksi</p>
+</div>
+</div>
+<div class="flex-1 overflow-y-auto py-6 px-3 space-y-1">
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors group" href="#">
+<span class="material-symbols-outlined text-slate-400 group-hover:text-primary transition-colors">dashboard</span>
+<span class="text-sm font-medium">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-primary/10 text-primary dark:text-primary" href="#">
+<span class="material-symbols-outlined">factory</span>
+<span class="text-sm font-medium">Production</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors group" href="#">
+<span class="material-symbols-outlined text-slate-400 group-hover:text-primary transition-colors">inventory_2</span>
+<span class="text-sm font-medium">Inventory</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors group" href="#">
+<span class="material-symbols-outlined text-slate-400 group-hover:text-primary transition-colors">receipt_long</span>
+<span class="text-sm font-medium">Recipes</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors group" href="#">
+<span class="material-symbols-outlined text-slate-400 group-hover:text-primary transition-colors">point_of_sale</span>
+<span class="text-sm font-medium">POS</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors group" href="#">
+<span class="material-symbols-outlined text-slate-400 group-hover:text-primary transition-colors">bar_chart</span>
+<span class="text-sm font-medium">Reports</span>
+</a>
+</div>
+<div class="p-3 border-t border-slate-100 dark:border-slate-800">
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors group" href="#">
+<span class="material-symbols-outlined text-slate-400 group-hover:text-primary transition-colors">settings</span>
+<span class="text-sm font-medium">Settings</span>
+</a>
+<div class="flex items-center gap-3 px-3 py-3 mt-2 rounded-lg bg-slate-50 dark:bg-slate-800/50">
+<div class="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 bg-cover bg-center" data-alt="User avatar" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBnyfFtBdu1y5ogai50i-ENrJ4M7xrAZU03JH9UaZIYBjxF6cCEV-YQFPcKwWN-LU7P3egEOB2cX9SUx3qVAK4i3wlo0lUfDjmHBIJAh33j6m32a1MYkozxBoCU91W9y8jCmeOSdn3hEsHV15Et0DQ4QZc4s9iaw3Y9D-MdT_qISpWlYMwDRVnyleGA41H6k62svPaf7U3ctJS5L4jINKYrdXruL2hCYm2vPDTWoMrL6gaa9JAPvbjqWTPi66eqapGgjkA6IHStiNw');"></div>
+<div class="flex-1 min-w-0">
+<p class="text-sm font-medium text-slate-900 dark:text-white truncate">Budi Santoso</p>
+<p class="text-xs text-slate-500 dark:text-slate-400 truncate">Owner</p>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="flex-1 flex flex-col overflow-hidden bg-background-light dark:bg-background-dark relative">
+<!-- Top Navbar -->
+<header class="flex items-center justify-between px-6 py-3 bg-surface-light dark:bg-surface-dark border-b border-slate-200 dark:border-slate-800 z-10">
+<div class="flex items-center gap-4 lg:hidden">
+<button class="text-slate-500 hover:text-slate-700 dark:text-slate-300">
+<span class="material-symbols-outlined">menu</span>
+</button>
+<h2 class="text-lg font-bold text-slate-900 dark:text-white">MPI System</h2>
+</div>
+<div class="hidden lg:flex items-center gap-4 flex-1 max-w-xl">
+<div class="relative w-full">
+<span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 material-symbols-outlined" style="font-size: 20px;">search</span>
+<input class="w-full pl-10 pr-4 py-2 bg-slate-100 dark:bg-slate-800 border-none rounded-lg text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-primary focus:bg-white dark:focus:bg-slate-700 transition-all" placeholder="Search production runs, inventory, reports..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-3 ml-auto">
+<button class="relative p-2 text-slate-500 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white dark:border-surface-dark"></span>
+</button>
+<button class="p-2 text-slate-500 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors">
+<span class="material-symbols-outlined">help</span>
+</button>
+</div>
+</header>
+<!-- Scrollable Content -->
+<div class="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8 scroll-smooth">
+<div class="max-w-7xl mx-auto space-y-6">
+<!-- Header & Actions -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+<div>
+<h2 class="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white tracking-tight">Production Analytics</h2>
+<p class="text-slate-500 dark:text-slate-400 mt-1">Overview of efficiency, COGS (HPP), and inventory health.</p>
+</div>
+<div class="flex flex-wrap items-center gap-3">
+<div class="flex items-center bg-white dark:bg-surface-dark border border-slate-200 dark:border-slate-700 rounded-lg p-1 shadow-sm">
+<button class="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-700 rounded text-slate-500 dark:text-slate-400">
+<span class="material-symbols-outlined text-sm">chevron_left</span>
+</button>
+<span class="px-3 text-sm font-medium text-slate-700 dark:text-slate-200">October 2023</span>
+<button class="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-700 rounded text-slate-500 dark:text-slate-400">
+<span class="material-symbols-outlined text-sm">chevron_right</span>
+</button>
+</div>
+<button class="flex items-center gap-2 bg-primary hover:bg-primary-dark text-white px-4 py-2.5 rounded-lg font-medium shadow-sm transition-colors shadow-primary/20">
+<span class="material-symbols-outlined text-xl">add_circle</span>
+<span>Create Run</span>
+</button>
+</div>
+</div>
+<!-- Alert Section -->
+<div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/50 rounded-xl p-4 flex items-start gap-4 shadow-sm">
+<div class="p-2 bg-amber-100 dark:bg-amber-900/40 rounded-lg text-amber-600 dark:text-amber-400 shrink-0">
+<span class="material-symbols-outlined">warning</span>
+</div>
+<div class="flex-1">
+<h4 class="text-sm font-bold text-amber-800 dark:text-amber-200">Production Alert: Low Stock</h4>
+<p class="text-sm text-amber-700 dark:text-amber-300 mt-0.5">Stock for <span class="font-semibold">Premium Cocoa Powder</span> is below safety threshold (5kg remaining). This may affect 'Choco Deluxe' scheduled runs.</p>
+</div>
+<button class="text-amber-500 hover:text-amber-700 dark:hover:text-amber-200 text-sm font-medium underline">Order Now</button>
+</div>
+<!-- KPI Cards -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6">
+<!-- Card 1 -->
+<div class="bg-surface-light dark:bg-surface-dark rounded-xl p-5 border border-slate-200 dark:border-slate-800 shadow-sm relative overflow-hidden group">
+<div class="flex justify-between items-start mb-4">
+<div>
+<p class="text-slate-500 dark:text-slate-400 text-sm font-medium">Total Production Value</p>
+<h3 class="text-2xl font-bold text-slate-900 dark:text-white mt-1">Rp 152.4M</h3>
+</div>
+<div class="p-2 bg-primary/10 rounded-lg text-primary">
+<span class="material-symbols-outlined">payments</span>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<span class="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-xs font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
+<span class="material-symbols-outlined text-xs">trending_up</span> 12%
+                                </span>
+<span class="text-xs text-slate-400">vs last month</span>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="bg-surface-light dark:bg-surface-dark rounded-xl p-5 border border-slate-200 dark:border-slate-800 shadow-sm relative overflow-hidden group">
+<div class="flex justify-between items-start mb-4">
+<div>
+<p class="text-slate-500 dark:text-slate-400 text-sm font-medium">Avg. COGS (HPP)</p>
+<h3 class="text-2xl font-bold text-slate-900 dark:text-white mt-1">Rp 14.850</h3>
+</div>
+<div class="p-2 bg-primary/10 rounded-lg text-primary">
+<span class="material-symbols-outlined">analytics</span>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<span class="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-xs font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
+<span class="material-symbols-outlined text-xs">trending_down</span> 5%
+                                </span>
+<span class="text-xs text-slate-400">Improved efficiency</span>
+</div>
+</div>
+<!-- Card 3 -->
+<div class="bg-surface-light dark:bg-surface-dark rounded-xl p-5 border border-slate-200 dark:border-slate-800 shadow-sm relative overflow-hidden group">
+<div class="flex justify-between items-start mb-4">
+<div>
+<p class="text-slate-500 dark:text-slate-400 text-sm font-medium">Inventory Turnover</p>
+<h3 class="text-2xl font-bold text-slate-900 dark:text-white mt-1">4.2x</h3>
+</div>
+<div class="p-2 bg-primary/10 rounded-lg text-primary">
+<span class="material-symbols-outlined">sync_alt</span>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<span class="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-xs font-bold px-2 py-0.5 rounded-full">
+                                    Healthy
+                                </span>
+<span class="text-xs text-slate-400">Target: &gt;3.5x</span>
+</div>
+</div>
+</div>
+<!-- Charts & Tables Row 1 -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+<!-- Recipe Builder Summary (2 Cols) -->
+<div class="lg:col-span-2 bg-surface-light dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-6">
+<div class="flex items-center justify-between mb-6">
+<div>
+<h3 class="text-lg font-bold text-slate-900 dark:text-white">Recipe Profitability</h3>
+<p class="text-sm text-slate-500 dark:text-slate-400">Top earners vs High production costs</p>
+</div>
+<button class="text-primary text-sm font-medium hover:underline">View All Recipes</button>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<!-- Winners -->
+<div class="space-y-4">
+<h4 class="text-xs font-semibold uppercase tracking-wider text-green-600 dark:text-green-400 flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">stars</span> Top Margin Products
+                                    </h4>
+<div class="flex items-center gap-3 p-3 rounded-lg bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+<div class="w-10 h-10 rounded-md bg-cover bg-center" data-alt="Kopi Susu image" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDnYn5lbzmyw5fC0BgLSqaW4JWGTltZsTghK2o_nofvnSvUC70l1_TKrXv3x_0Tj0_1O63unjiaXdBJOXF2mVR8wJrnArbQ82al1YCi6Sk2K1mpcJ6SZB9KLGfZI48_MCVdhTwy5ZzZWlup9iAofimbDysGvyVwwMUVwPSScdr-D1BW-OY_VaHHCwzCXiR_QQNDMiBE2en7_651W8uWNY0uQxFmD9mBL4W4iZ9WuPXcq0b2kqG9P_iopth3aGavPl-sz4ENb35Zc1c');"></div>
+<div class="flex-1">
+<p class="text-sm font-semibold text-slate-900 dark:text-white">Kopi Susu Aren</p>
+<p class="text-xs text-slate-500">Margin: <span class="text-green-600 font-bold">+65%</span></p>
+</div>
+<div class="text-right">
+<p class="text-sm font-medium text-slate-900 dark:text-white">Rp 18k</p>
+<p class="text-xs text-slate-400">Price</p>
+</div>
+</div>
+<div class="flex items-center gap-3 p-3 rounded-lg bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+<div class="w-10 h-10 rounded-md bg-cover bg-center" data-alt="Berry Smoothie image" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCoEVJ1nwdc74W9VBuPt3zs2r5EkmwqmGWkCBKRp4XDbS8uQ8S8-fTbs-9kAtGOVFxpYPSYi7XW0bGF4SPQ1RLuxYQW8yg-h8O7aCNfNueoYVEPXF9dsCDODw3yJpZNQXdrRzIPgqtG-mmyM1znWum5MDZfZEF2WmzxFxQOqAhzPoushARn0m8jjNbqpnURFBa9K1Yv0PTzHb-xc4bnlLramB195xwMvgavmwgU_BMZqK4gCI1BHGwz6ZTSLdOT2GAf0N0JykdGAyk');"></div>
+<div class="flex-1">
+<p class="text-sm font-semibold text-slate-900 dark:text-white">Berry Burst</p>
+<p class="text-xs text-slate-500">Margin: <span class="text-green-600 font-bold">+58%</span></p>
+</div>
+<div class="text-right">
+<p class="text-sm font-medium text-slate-900 dark:text-white">Rp 25k</p>
+<p class="text-xs text-slate-400">Price</p>
+</div>
+</div>
+</div>
+<!-- Cost Heavy -->
+<div class="space-y-4">
+<h4 class="text-xs font-semibold uppercase tracking-wider text-red-500 dark:text-red-400 flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">trending_up</span> Highest Base Cost
+                                    </h4>
+<div class="flex items-center gap-3 p-3 rounded-lg bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+<div class="w-10 h-10 rounded-md bg-cover bg-center" data-alt="Matcha Latte image" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDWq6wAonB0S5k75WZthgSONndZ74CJPtV1Uj3rhE8eA_IW4ivWC3s6fF8m9zzB-8_pGlgf8WGuy54GqHDzndaFsEGHlZh8is-wPfZM1qSCWb6iLfQtz_SMoToQDqsAnkrxNaFJwkiwWGenm_TMU5B4LkgY-vjoEub8AfEc13G3LCwd_i-q75Zl9Yaj8zdSpceK90QuO1PVYX8StMoO-mz3AwWuiU51w8E4A9wJg1v0HkEZinFHIwNwbPyNvAs656IVS5m2Fa1Ljh0');"></div>
+<div class="flex-1">
+<p class="text-sm font-semibold text-slate-900 dark:text-white">Premium Matcha</p>
+<p class="text-xs text-slate-500">Base Cost: <span class="text-red-500 font-bold">Rp 22k</span></p>
+</div>
+<div class="text-right">
+<p class="text-sm font-medium text-slate-900 dark:text-white">Rp 35k</p>
+<p class="text-xs text-slate-400">Price</p>
+</div>
+</div>
+<div class="flex items-center gap-3 p-3 rounded-lg bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+<div class="w-10 h-10 rounded-md bg-cover bg-center" data-alt="Wagyu Steak image" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBMzc1Gy19e36mgK2gNWQpH6xU-W-9e_oTVzAhFCqrTcHyJ5rGREL0tQD-COMr3tmy_JQAMYapSzeCtlsNPU0lntUsYwNO80g9vpFtSMGMFyDnb-Dx4n0AA7icU0VXefXxHlmQGI39LZczcJ0GNyOWRD7NBgsW3W5VfPzSSsxq85TxA4jTN4xHNf8AI-N3lBiAktHy0t-IWlbvDrXfiG-J0kuFZn0FkEn4YZeC0snq5qZ16_t457bp1BuNPBtsSLDGdKZOYI64QDYA');"></div>
+<div class="flex-1">
+<p class="text-sm font-semibold text-slate-900 dark:text-white">Wagyu Rice Bowl</p>
+<p class="text-xs text-slate-500">Base Cost: <span class="text-red-500 font-bold">Rp 45k</span></p>
+</div>
+<div class="text-right">
+<p class="text-sm font-medium text-slate-900 dark:text-white">Rp 85k</p>
+<p class="text-xs text-slate-400">Price</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Inventory Distribution (1 Col) -->
+<div class="bg-surface-light dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-6 flex flex-col">
+<h3 class="text-lg font-bold text-slate-900 dark:text-white mb-6">Inventory Value</h3>
+<div class="flex-1 flex flex-col items-center justify-center relative min-h-[200px]">
+<!-- Donut Chart Representation -->
+<div class="w-48 h-48 rounded-full border-[16px] border-slate-100 dark:border-slate-800 relative flex items-center justify-center">
+<!-- CSS Conic Gradient for Chart -->
+<div class="absolute inset-0 rounded-full" style="background: conic-gradient(#0d968b 0% 45%, #e2e8f0 45% 60%, #3b82f6 60% 100%); mask-image: radial-gradient(transparent 58%, black 60%); -webkit-mask-image: radial-gradient(transparent 58%, black 60%);"></div>
+<div class="text-center z-10">
+<p class="text-xs text-slate-500 dark:text-slate-400">Total Value</p>
+<p class="text-xl font-bold text-slate-900 dark:text-white">Rp 85M</p>
+</div>
+</div>
+</div>
+<div class="space-y-3 mt-6">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<div class="w-3 h-3 rounded-full bg-primary"></div>
+<span class="text-sm text-slate-600 dark:text-slate-300">Raw Materials</span>
+</div>
+<span class="text-sm font-bold text-slate-900 dark:text-white">45%</span>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<div class="w-3 h-3 rounded-full bg-blue-500"></div>
+<span class="text-sm text-slate-600 dark:text-slate-300">Finished Goods</span>
+</div>
+<span class="text-sm font-bold text-slate-900 dark:text-white">40%</span>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<div class="w-3 h-3 rounded-full bg-slate-200 dark:bg-slate-600"></div>
+<span class="text-sm text-slate-600 dark:text-slate-300">WIP</span>
+</div>
+<span class="text-sm font-bold text-slate-900 dark:text-white">15%</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Top Raw Materials Table -->
+<div class="bg-surface-light dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+<div class="p-6 border-b border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+<div>
+<h3 class="text-lg font-bold text-slate-900 dark:text-white">Top Raw Materials</h3>
+<p class="text-sm text-slate-500 dark:text-slate-400">By consumption volume</p>
+</div>
+<div class="flex gap-2">
+<button class="px-3 py-1.5 text-xs font-medium bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">Export CSV</button>
+<button class="px-3 py-1.5 text-xs font-medium bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">Manage Stock</button>
+</div>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left text-sm text-slate-600 dark:text-slate-300">
+<thead class="bg-slate-50 dark:bg-slate-800/50 text-xs uppercase font-medium text-slate-500 dark:text-slate-400">
+<tr>
+<th class="px-6 py-4">Material Name</th>
+<th class="px-6 py-4">Monthly Usage</th>
+<th class="px-6 py-4">Current Stock</th>
+<th class="px-6 py-4">Status</th>
+<th class="px-6 py-4 text-right">Last Purchase</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+<td class="px-6 py-4 font-medium text-slate-900 dark:text-white">Arabica Coffee Beans</td>
+<td class="px-6 py-4">120 kg</td>
+<td class="px-6 py-4">45 kg</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">In Stock</span>
+</td>
+<td class="px-6 py-4 text-right">Oct 24, 2023</td>
+</tr>
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+<td class="px-6 py-4 font-medium text-slate-900 dark:text-white">Fresh Milk (UHT)</td>
+<td class="px-6 py-4">450 L</td>
+<td class="px-6 py-4">120 L</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">In Stock</span>
+</td>
+<td class="px-6 py-4 text-right">Oct 28, 2023</td>
+</tr>
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+<td class="px-6 py-4 font-medium text-slate-900 dark:text-white">Palm Sugar (Aren)</td>
+<td class="px-6 py-4">80 kg</td>
+<td class="px-6 py-4">12 kg</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400">Running Low</span>
+</td>
+<td class="px-6 py-4 text-right">Sep 15, 2023</td>
+</tr>
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+<td class="px-6 py-4 font-medium text-slate-900 dark:text-white">Packaging Cups 16oz</td>
+<td class="px-6 py-4">2500 pcs</td>
+<td class="px-6 py-4">150 pcs</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400">Critical</span>
+</td>
+<td class="px-6 py-4 text-right">Oct 01, 2023</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>

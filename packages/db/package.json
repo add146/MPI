@@ -1,0 +1,23 @@
+{
+    "name": "@mpi/db",
+    "version": "1.0.0",
+    "private": true,
+    "type": "module",
+    "exports": {
+        ".": "./src/index.ts",
+        "./schema": "./src/schema/index.ts"
+    },
+    "scripts": {
+        "generate": "drizzle-kit generate",
+        "push": "drizzle-kit push",
+        "studio": "drizzle-kit studio"
+    },
+    "dependencies": {
+        "drizzle-orm": "^0.29.0",
+        "postgres": "^3.4.0"
+    },
+    "devDependencies": {
+        "drizzle-kit": "^0.20.0",
+        "typescript": "^5.3.0"
+    }
+}
