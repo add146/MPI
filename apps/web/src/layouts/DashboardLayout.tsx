@@ -189,36 +189,36 @@ export default function DashboardLayout() {
             {/* Sidebar */}
             <aside
                 className={cn(
-                    'fixed inset-y-0 left-0 z-50 w-64 bg-gray-900 transform transition-transform duration-200 lg:relative lg:translate-x-0',
+                    'fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 transform transition-transform duration-200 lg:relative lg:translate-x-0',
                     sidebarOpen ? 'translate-x-0' : '-translate-x-full'
                 )}
             >
                 <div className="flex h-full flex-col">
                     {/* Logo */}
-                    <div className="flex h-16 items-center justify-between px-4 border-b border-gray-800">
+                    <div className="flex h-16 items-center justify-between px-4 border-b border-gray-200">
                         <div className="flex items-center gap-2">
                             <div className="h-8 w-8 rounded-lg bg-primary-500 flex items-center justify-center">
                                 <Boxes className="h-5 w-5 text-white" />
                             </div>
                             <div>
-                                <h1 className="text-lg font-bold text-white">MPI System</h1>
-                                <p className="text-xs text-gray-400">Manajemen Produksi</p>
+                                <h1 className="text-lg font-bold text-gray-900">MPI System</h1>
+                                <p className="text-xs text-gray-500">Manajemen Produksi</p>
                             </div>
                         </div>
                         <button
                             onClick={() => setSidebarOpen(false)}
-                            className="lg:hidden text-gray-400 hover:text-white"
+                            className="lg:hidden text-gray-500 hover:text-gray-700"
                         >
                             <X className="h-5 w-5" />
                         </button>
                     </div>
 
                     {/* Outlet Selector */}
-                    <div className="px-4 py-3 border-b border-gray-800">
+                    <div className="px-4 py-3 border-b border-gray-200">
                         <select
                             value={currentOutletId || ''}
                             onChange={(e) => setCurrentOutlet(e.target.value)}
-                            className="w-full bg-gray-800 text-white text-sm rounded-lg px-3 py-2 border border-gray-700 focus:border-primary-500 focus:outline-none"
+                            className="w-full bg-gray-50 text-gray-900 text-sm rounded-lg px-3 py-2 border border-gray-300 focus:border-primary-500 focus:outline-none"
                         >
                             {outlets.map((outlet) => (
                                 <option key={outlet.id} value={outlet.id}>
@@ -236,7 +236,7 @@ export default function DashboardLayout() {
                     </nav>
 
                     {/* POS Button */}
-                    <div className="px-4 py-3 border-t border-gray-800">
+                    <div className="px-4 py-3 border-t border-gray-200">
                         <button
                             onClick={() => navigate('/pos')}
                             className="w-full btn-primary"
@@ -247,20 +247,20 @@ export default function DashboardLayout() {
                     </div>
 
                     {/* User */}
-                    <div className="px-4 py-3 border-t border-gray-800">
+                    <div className="px-4 py-3 border-t border-gray-200">
                         <div className="flex items-center gap-3">
-                            <div className="h-10 w-10 rounded-full bg-gray-700 flex items-center justify-center">
-                                <span className="text-white font-medium">
+                            <div className="h-10 w-10 rounded-full bg-primary-100 flex items-center justify-center">
+                                <span className="text-primary-600 font-medium">
                                     {user?.name?.charAt(0).toUpperCase()}
                                 </span>
                             </div>
                             <div className="flex-1 min-w-0">
-                                <p className="text-sm font-medium text-white truncate">{user?.name}</p>
-                                <p className="text-xs text-gray-400 truncate">{user?.email}</p>
+                                <p className="text-sm font-medium text-gray-900 truncate">{user?.name}</p>
+                                <p className="text-xs text-gray-500 truncate">{user?.email}</p>
                             </div>
                             <button
                                 onClick={handleLogout}
-                                className="text-gray-400 hover:text-red-400"
+                                className="text-gray-400 hover:text-red-500"
                                 title="Logout"
                             >
                                 <LogOut className="h-5 w-5" />
