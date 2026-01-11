@@ -133,7 +133,6 @@ export const priceLevels = pgTable('price_levels', {
 export const priceLevelsRelations = relations(priceLevels, ({ one, many }) => ({
     outlet: one(outlets, { fields: [priceLevels.outletId], references: [outlets.id] }),
     productPrices: many(productPrices),
-    customers: many(customers),
 }));
 
 // ===============================
@@ -152,5 +151,3 @@ export const productPricesRelations = relations(productPrices, ({ one }) => ({
     level: one(priceLevels, { fields: [productPrices.levelId], references: [priceLevels.id] }),
 }));
 
-// Re-export for relations
-import { customers } from './customers';

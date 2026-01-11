@@ -47,10 +47,6 @@ export const outlets = pgTable('outlets', {
 export const outletsRelations = relations(outlets, ({ one, many }) => ({
     owner: one(users, { fields: [outlets.ownerId], references: [users.id] }),
     employees: many(employees),
-    products: many(products),
-    rawMaterials: many(rawMaterials),
-    priceLevels: many(priceLevels),
-    customers: many(customers),
     categories: many(categories),
     brands: many(brands),
 }));

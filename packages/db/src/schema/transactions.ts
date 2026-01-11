@@ -1,8 +1,6 @@
-import { pgTable, uuid, varchar, text, timestamp, decimal, integer } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, varchar, text, timestamp, decimal, integer, boolean } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
-import { paymentStatusEnum } from './core';
-import { outlets, employees } from './core';
-import { customers } from './customers';
+import { paymentStatusEnum, outlets, employees } from './core';
 import { priceLevels, products, bundles } from './catalog';
 
 // ===============================
@@ -13,12 +11,10 @@ export const paymentMethods = pgTable('payment_methods', {
     id: uuid('id').primaryKey().defaultRandom(),
     outletId: uuid('outlet_id').references(() => outlets.id).notNull(),
     name: varchar('name', { length: 50 }).notNull(),
-    type: varchar('type', { length: 50 }), // cash, qris, transfer, debit, credit
+    type: varchar('type', { length: 50 }),
     isActive: boolean('is_active').default(true),
     createdAt: timestamp('created_at').defaultNow(),
 });
-
-import { boolean } from 'drizzle-orm/pg-core';
 
 // ===============================
 // SHIFTS
@@ -44,29 +40,24 @@ export const transactions = pgTable('transactions', {
     id: uuid('id').primaryKey().defaultRandom(),
     outletId: uuid('outlet_id').references(() => outlets.id).notNull(),
     employeeId: uuid('employee_id').references(() => employees.id),
-    customerId: uuid('customer_id').references(() => customers.id),
+    customerId: uuid('customer_id'), // No FK to avoid circular import
     shiftId: uuid('shift_id').references(() => shifts.id),
 
-    // Order number
     orderNumber: varchar('order_number', { length: 50 }),
 
-    // Pricing
     subtotal: decimal('subtotal', { precision: 15, scale: 2 }).notNull(),
     taxAmount: decimal('tax_amount', { precision: 15, scale: 2 }).default('0'),
     discountAmount: decimal('discount_amount', { precision: 15, scale: 2 }).default('0'),
     total: decimal('total', { precision: 15, scale: 2 }).notNull(),
 
-    // Customer level at time of transaction
     appliedLevelId: uuid('applied_level_id').references(() => priceLevels.id),
     pointsEarned: integer('points_earned').default(0),
 
-    // Payment
     paymentMethodId: uuid('payment_method_id').references(() => paymentMethods.id),
     paymentStatus: paymentStatusEnum('payment_status').default('pending'),
     paidAmount: decimal('paid_amount', { precision: 15, scale: 2 }),
     changeAmount: decimal('change_amount', { precision: 15, scale: 2 }),
 
-    // Meta
     notes: text('notes'),
     createdAt: timestamp('created_at').defaultNow(),
 });
@@ -74,7 +65,6 @@ export const transactions = pgTable('transactions', {
 export const transactionsRelations = relations(transactions, ({ one, many }) => ({
     outlet: one(outlets, { fields: [transactions.outletId], references: [outlets.id] }),
     employee: one(employees, { fields: [transactions.employeeId], references: [employees.id] }),
-    customer: one(customers, { fields: [transactions.customerId], references: [customers.id] }),
     appliedLevel: one(priceLevels, { fields: [transactions.appliedLevelId], references: [priceLevels.id] }),
     paymentMethod: one(paymentMethods, { fields: [transactions.paymentMethodId], references: [paymentMethods.id] }),
     items: many(transactionItems),
@@ -92,7 +82,7 @@ export const transactionItems = pgTable('transaction_items', {
     quantity: decimal('quantity', { precision: 10, scale: 3 }).notNull(),
     unitPrice: decimal('unit_price', { precision: 15, scale: 2 }).notNull(),
     subtotal: decimal('subtotal', { precision: 15, scale: 2 }).notNull(),
-    costPrice: decimal('cost_price', { precision: 15, scale: 2 }), // HPP snapshot
+    costPrice: decimal('cost_price', { precision: 15, scale: 2 }),
     notes: text('notes'),
 });
 
