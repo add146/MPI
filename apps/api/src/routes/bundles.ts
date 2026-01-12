@@ -84,9 +84,11 @@ bundlesRoutes.post('/', async (c) => {
         }
 
         const savings = originalPrice - data.bundlePrice;
+        const bundleId = crypto.randomUUID();
 
         // Create bundle
-        const [bundle] = await db.insert(bundles).values({
+        await db.insert(bundles).values({
+            id: bundleId,
             outletId: data.outletId,
             name: data.name,
             description: data.description,
@@ -96,12 +98,13 @@ bundlesRoutes.post('/', async (c) => {
             startDate: data.startDate ? new Date(data.startDate) : null,
             endDate: data.endDate ? new Date(data.endDate) : null,
             imageUrl: data.imageUrl,
-        }).returning();
+        });
 
         // Create bundle items
         await db.insert(bundleItems).values(
             data.items.map((item) => ({
-                bundleId: bundle.id,
+                id: crypto.randomUUID(),
+                bundleId: bundleId,
                 productId: item.productId,
                 quantity: item.quantity,
             }))
@@ -109,7 +112,7 @@ bundlesRoutes.post('/', async (c) => {
 
         // Return bundle with items
         const result = await db.query.bundles.findFirst({
-            where: eq(bundles.id, bundle.id),
+            where: eq(bundles.id, bundleId),
             with: {
                 items: {
                     with: {
@@ -134,8 +137,17 @@ bundlesRoutes.put('/:id', async (c) => {
         const id = c.req.param('id');
         const body = await c.req.json();
 
+        // Check if exists
+        const existing = await db.query.bundles.findFirst({
+            where: eq(bundles.id, id),
+        });
+
+        if (!existing) {
+            return c.json({ error: 'Bundle not found' }, 404);
+        }
+
         // Update bundle
-        const [updated] = await db.update(bundles)
+        await db.update(bundles)
             .set({
                 name: body.name,
                 description: body.description,
@@ -145,12 +157,7 @@ bundlesRoutes.put('/:id', async (c) => {
                 imageUrl: body.imageUrl,
                 isActive: body.isActive,
             })
-            .where(eq(bundles.id, id))
-            .returning();
-
-        if (!updated) {
-            return c.json({ error: 'Bundle not found' }, 404);
-        }
+            .where(eq(bundles.id, id));
 
         // If items are provided, replace them
         if (body.items && Array.isArray(body.items)) {
@@ -167,7 +174,10 @@ bundlesRoutes.put('/:id', async (c) => {
                 }
             }
 
-            const savings = originalPrice - parseFloat(updated.bundlePrice || '0');
+            const updatedBundle = await db.query.bundles.findFirst({
+                where: eq(bundles.id, id),
+            });
+            const savings = originalPrice - parseFloat(updatedBundle?.bundlePrice || '0');
 
             await db.update(bundles)
                 .set({
@@ -178,6 +188,7 @@ bundlesRoutes.put('/:id', async (c) => {
 
             await db.insert(bundleItems).values(
                 body.items.map((item: { productId: string; quantity: number }) => ({
+                    id: crypto.randomUUID(),
                     bundleId: id,
                     productId: item.productId,
                     quantity: item.quantity,
@@ -207,13 +218,15 @@ bundlesRoutes.put('/:id', async (c) => {
 bundlesRoutes.delete('/:id', async (c) => {
     const id = c.req.param('id');
 
-    const [deleted] = await db.delete(bundles)
-        .where(eq(bundles.id, id))
-        .returning();
+    const existing = await db.query.bundles.findFirst({
+        where: eq(bundles.id, id),
+    });
 
-    if (!deleted) {
+    if (!existing) {
         return c.json({ error: 'Bundle not found' }, 404);
     }
+
+    await db.delete(bundles).where(eq(bundles.id, id));
 
     return c.json({ success: true });
 });

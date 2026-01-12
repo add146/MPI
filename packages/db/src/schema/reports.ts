@@ -1,21 +1,19 @@
-import { pgTable, uuid, varchar, text, timestamp, decimal, boolean, date } from 'drizzle-orm/pg-core';
+import { mysqlTable, varchar, text, timestamp, decimal, boolean, date, json, mysqlEnum } from 'drizzle-orm/mysql-core';
 import { relations } from 'drizzle-orm';
-import { accountTypeEnum, reportTypeEnum } from './core';
 import { outlets, users } from './core';
-import { jsonb } from 'drizzle-orm/pg-core';
 
 // ===============================
 // CHART OF ACCOUNTS (COA)
 // ===============================
 
-export const accounts = pgTable('accounts', {
-    id: uuid('id').primaryKey().defaultRandom(),
-    outletId: uuid('outlet_id').references(() => outlets.id).notNull(),
-    code: varchar('code', { length: 10 }).notNull(), // 1-1000 (Kas)
+export const accounts = mysqlTable('accounts', {
+    id: varchar('id', { length: 36 }).primaryKey().$defaultFn(() => crypto.randomUUID()),
+    outletId: varchar('outlet_id', { length: 36 }).notNull(),
+    code: varchar('code', { length: 10 }).notNull(),
     name: varchar('name', { length: 100 }).notNull(),
-    type: accountTypeEnum('type').notNull(),
-    parentId: uuid('parent_id'),
-    isSystem: boolean('is_system').default(false), // System-generated, non-editable
+    type: mysqlEnum('type', ['asset', 'liability', 'equity', 'revenue', 'expense']).notNull(),
+    parentId: varchar('parent_id', { length: 36 }),
+    isSystem: boolean('is_system').default(false),
     balance: decimal('balance', { precision: 15, scale: 2 }).default('0'),
     createdAt: timestamp('created_at').defaultNow(),
 });
@@ -28,13 +26,13 @@ export const accountsRelations = relations(accounts, ({ one }) => ({
 // JOURNAL ENTRIES
 // ===============================
 
-export const journalEntries = pgTable('journal_entries', {
-    id: uuid('id').primaryKey().defaultRandom(),
-    outletId: uuid('outlet_id').references(() => outlets.id).notNull(),
+export const journalEntries = mysqlTable('journal_entries', {
+    id: varchar('id', { length: 36 }).primaryKey().$defaultFn(() => crypto.randomUUID()),
+    outletId: varchar('outlet_id', { length: 36 }).notNull(),
     entryDate: date('entry_date').notNull(),
-    reference: varchar('reference', { length: 50 }), // INV-001, PO-001
+    reference: varchar('reference', { length: 50 }),
     description: text('description'),
-    createdBy: uuid('created_by').references(() => users.id),
+    createdBy: varchar('created_by', { length: 36 }),
     createdAt: timestamp('created_at').defaultNow(),
 });
 
@@ -48,10 +46,10 @@ export const journalEntriesRelations = relations(journalEntries, ({ one, many })
 // JOURNAL LINES
 // ===============================
 
-export const journalLines = pgTable('journal_lines', {
-    id: uuid('id').primaryKey().defaultRandom(),
-    entryId: uuid('entry_id').references(() => journalEntries.id, { onDelete: 'cascade' }).notNull(),
-    accountId: uuid('account_id').references(() => accounts.id).notNull(),
+export const journalLines = mysqlTable('journal_lines', {
+    id: varchar('id', { length: 36 }).primaryKey().$defaultFn(() => crypto.randomUUID()),
+    entryId: varchar('entry_id', { length: 36 }).notNull(),
+    accountId: varchar('account_id', { length: 36 }).notNull(),
     debit: decimal('debit', { precision: 15, scale: 2 }).default('0'),
     credit: decimal('credit', { precision: 15, scale: 2 }).default('0'),
 });
@@ -65,13 +63,13 @@ export const journalLinesRelations = relations(journalLines, ({ one }) => ({
 // REPORT SNAPSHOTS (for Excel Export)
 // ===============================
 
-export const reportSnapshots = pgTable('report_snapshots', {
-    id: uuid('id').primaryKey().defaultRandom(),
-    outletId: uuid('outlet_id').references(() => outlets.id).notNull(),
-    reportType: reportTypeEnum('report_type').notNull(),
+export const reportSnapshots = mysqlTable('report_snapshots', {
+    id: varchar('id', { length: 36 }).primaryKey().$defaultFn(() => crypto.randomUUID()),
+    outletId: varchar('outlet_id', { length: 36 }).notNull(),
+    reportType: mysqlEnum('report_type', ['balance_sheet', 'profit_loss']).notNull(),
     periodStart: date('period_start').notNull(),
     periodEnd: date('period_end').notNull(),
-    data: jsonb('data').notNull(), // Full report data
+    data: json('data').notNull(),
     createdAt: timestamp('created_at').defaultNow(),
 });
 

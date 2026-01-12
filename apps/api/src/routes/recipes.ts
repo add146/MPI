@@ -1,7 +1,7 @@
 import { Hono } from 'hono';
 import { z } from 'zod';
 import { db, recipes, products, rawMaterials } from '@mpi/db';
-import { eq, and, sql } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
 
 export const recipesRoutes = new Hono();
 
@@ -56,6 +56,7 @@ recipesRoutes.put('/product/:productId', async (c) => {
         if (items.length > 0) {
             await db.insert(recipes).values(
                 items.map((item) => ({
+                    id: crypto.randomUUID(),
                     productId,
                     rawMaterialId: item.rawMaterialId,
                     quantity: item.quantity.toString(),
@@ -117,13 +118,16 @@ recipesRoutes.post('/product/:productId/item', async (c) => {
         const body = await c.req.json();
         const item = recipeItemSchema.parse(body);
 
-        const [newRecipe] = await db.insert(recipes).values({
+        const recipeId = crypto.randomUUID();
+
+        await db.insert(recipes).values({
+            id: recipeId,
             productId,
             rawMaterialId: item.rawMaterialId,
             quantity: item.quantity.toString(),
             unit: item.unit,
             notes: item.notes,
-        }).returning();
+        });
 
         // Update hasRecipe
         await db.update(products)
@@ -144,6 +148,11 @@ recipesRoutes.post('/product/:productId/item', async (c) => {
         await db.update(products)
             .set({ costPrice: hpp.toString() })
             .where(eq(products.id, productId));
+
+        const newRecipe = await db.query.recipes.findFirst({
+            where: eq(recipes.id, recipeId),
+            with: { rawMaterial: true },
+        });
 
         return c.json(newRecipe, 201);
     } catch (error) {

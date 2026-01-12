@@ -1,15 +1,15 @@
-import { pgTable, uuid, varchar, text, timestamp, decimal, integer, boolean } from 'drizzle-orm/pg-core';
+import { mysqlTable, varchar, text, timestamp, decimal, int, boolean, mysqlEnum } from 'drizzle-orm/mysql-core';
 import { relations } from 'drizzle-orm';
-import { paymentStatusEnum, outlets, employees } from './core';
+import { outlets, employees } from './core';
 import { priceLevels, products, bundles } from './catalog';
 
 // ===============================
 // PAYMENT METHODS
 // ===============================
 
-export const paymentMethods = pgTable('payment_methods', {
-    id: uuid('id').primaryKey().defaultRandom(),
-    outletId: uuid('outlet_id').references(() => outlets.id).notNull(),
+export const paymentMethods = mysqlTable('payment_methods', {
+    id: varchar('id', { length: 36 }).primaryKey().$defaultFn(() => crypto.randomUUID()),
+    outletId: varchar('outlet_id', { length: 36 }).notNull(),
     name: varchar('name', { length: 50 }).notNull(),
     type: varchar('type', { length: 50 }),
     isActive: boolean('is_active').default(true),
@@ -20,10 +20,10 @@ export const paymentMethods = pgTable('payment_methods', {
 // SHIFTS
 // ===============================
 
-export const shifts = pgTable('shifts', {
-    id: uuid('id').primaryKey().defaultRandom(),
-    outletId: uuid('outlet_id').references(() => outlets.id).notNull(),
-    employeeId: uuid('employee_id').references(() => employees.id).notNull(),
+export const shifts = mysqlTable('shifts', {
+    id: varchar('id', { length: 36 }).primaryKey().$defaultFn(() => crypto.randomUUID()),
+    outletId: varchar('outlet_id', { length: 36 }).notNull(),
+    employeeId: varchar('employee_id', { length: 36 }).notNull(),
     startTime: timestamp('start_time').notNull(),
     endTime: timestamp('end_time'),
     cashStart: decimal('cash_start', { precision: 15, scale: 2 }).default('0'),
@@ -36,12 +36,12 @@ export const shifts = pgTable('shifts', {
 // TRANSACTIONS
 // ===============================
 
-export const transactions = pgTable('transactions', {
-    id: uuid('id').primaryKey().defaultRandom(),
-    outletId: uuid('outlet_id').references(() => outlets.id).notNull(),
-    employeeId: uuid('employee_id').references(() => employees.id),
-    customerId: uuid('customer_id'), // No FK to avoid circular import
-    shiftId: uuid('shift_id').references(() => shifts.id),
+export const transactions = mysqlTable('transactions', {
+    id: varchar('id', { length: 36 }).primaryKey().$defaultFn(() => crypto.randomUUID()),
+    outletId: varchar('outlet_id', { length: 36 }).notNull(),
+    employeeId: varchar('employee_id', { length: 36 }),
+    customerId: varchar('customer_id', { length: 36 }),
+    shiftId: varchar('shift_id', { length: 36 }),
 
     orderNumber: varchar('order_number', { length: 50 }),
 
@@ -50,11 +50,11 @@ export const transactions = pgTable('transactions', {
     discountAmount: decimal('discount_amount', { precision: 15, scale: 2 }).default('0'),
     total: decimal('total', { precision: 15, scale: 2 }).notNull(),
 
-    appliedLevelId: uuid('applied_level_id').references(() => priceLevels.id),
-    pointsEarned: integer('points_earned').default(0),
+    appliedLevelId: varchar('applied_level_id', { length: 36 }),
+    pointsEarned: int('points_earned').default(0),
 
-    paymentMethodId: uuid('payment_method_id').references(() => paymentMethods.id),
-    paymentStatus: paymentStatusEnum('payment_status').default('pending'),
+    paymentMethodId: varchar('payment_method_id', { length: 36 }),
+    paymentStatus: mysqlEnum('payment_status', ['pending', 'paid', 'refunded']).default('pending'),
     paidAmount: decimal('paid_amount', { precision: 15, scale: 2 }),
     changeAmount: decimal('change_amount', { precision: 15, scale: 2 }),
 
@@ -74,11 +74,11 @@ export const transactionsRelations = relations(transactions, ({ one, many }) => 
 // TRANSACTION ITEMS
 // ===============================
 
-export const transactionItems = pgTable('transaction_items', {
-    id: uuid('id').primaryKey().defaultRandom(),
-    transactionId: uuid('transaction_id').references(() => transactions.id, { onDelete: 'cascade' }).notNull(),
-    productId: uuid('product_id').references(() => products.id),
-    bundleId: uuid('bundle_id').references(() => bundles.id),
+export const transactionItems = mysqlTable('transaction_items', {
+    id: varchar('id', { length: 36 }).primaryKey().$defaultFn(() => crypto.randomUUID()),
+    transactionId: varchar('transaction_id', { length: 36 }).notNull(),
+    productId: varchar('product_id', { length: 36 }),
+    bundleId: varchar('bundle_id', { length: 36 }),
     quantity: decimal('quantity', { precision: 10, scale: 3 }).notNull(),
     unitPrice: decimal('unit_price', { precision: 15, scale: 2 }).notNull(),
     subtotal: decimal('subtotal', { precision: 15, scale: 2 }).notNull(),

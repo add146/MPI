@@ -1,26 +1,26 @@
-import { pgTable, uuid, varchar, text, timestamp, boolean, decimal, integer, jsonb, pgEnum } from 'drizzle-orm/pg-core';
+import { mysqlTable, varchar, text, timestamp, boolean, decimal, int, json, mysqlEnum } from 'drizzle-orm/mysql-core';
 import { relations } from 'drizzle-orm';
 
 // ===============================
 // ENUMS
 // ===============================
 
-export const userRoleEnum = pgEnum('user_role', ['owner', 'admin', 'staff']);
-export const accountTypeEnum = pgEnum('account_type', ['asset', 'liability', 'equity', 'revenue', 'expense']);
-export const paymentStatusEnum = pgEnum('payment_status', ['pending', 'paid', 'refunded']);
-export const reportTypeEnum = pgEnum('report_type', ['balance_sheet', 'profit_loss']);
+export const userRoleEnum = mysqlEnum('role', ['owner', 'admin', 'staff']);
+export const accountTypeEnum = mysqlEnum('account_type', ['asset', 'liability', 'equity', 'revenue', 'expense']);
+export const paymentStatusEnum = mysqlEnum('payment_status', ['pending', 'paid', 'refunded']);
+export const reportTypeEnum = mysqlEnum('report_type', ['balance_sheet', 'profit_loss']);
 
 // ===============================
 // USERS & AUTHENTICATION
 // ===============================
 
-export const users = pgTable('users', {
-    id: uuid('id').primaryKey().defaultRandom(),
+export const users = mysqlTable('users', {
+    id: varchar('id', { length: 36 }).primaryKey().$defaultFn(() => crypto.randomUUID()),
     email: varchar('email', { length: 255 }).unique().notNull(),
     phone: varchar('phone', { length: 20 }),
     passwordHash: varchar('password_hash', { length: 255 }).notNull(),
     name: varchar('name', { length: 100 }),
-    role: userRoleEnum('role').default('owner'),
+    role: mysqlEnum('role', ['owner', 'admin', 'staff']).default('owner'),
     createdAt: timestamp('created_at').defaultNow(),
     updatedAt: timestamp('updated_at').defaultNow(),
 });
@@ -33,13 +33,13 @@ export const usersRelations = relations(users, ({ many }) => ({
 // OUTLETS (Multi-Outlet Support)
 // ===============================
 
-export const outlets = pgTable('outlets', {
-    id: uuid('id').primaryKey().defaultRandom(),
-    ownerId: uuid('owner_id').references(() => users.id).notNull(),
+export const outlets = mysqlTable('outlets', {
+    id: varchar('id', { length: 36 }).primaryKey().$defaultFn(() => crypto.randomUUID()),
+    ownerId: varchar('owner_id', { length: 36 }).notNull(),
     name: varchar('name', { length: 100 }).notNull(),
     address: text('address'),
     phone: varchar('phone', { length: 20 }),
-    settings: jsonb('settings').default({}),
+    settings: json('settings').default({}),
     createdAt: timestamp('created_at').defaultNow(),
     updatedAt: timestamp('updated_at').defaultNow(),
 });
@@ -55,9 +55,9 @@ export const outletsRelations = relations(outlets, ({ one, many }) => ({
 // EMPLOYEES
 // ===============================
 
-export const employees = pgTable('employees', {
-    id: uuid('id').primaryKey().defaultRandom(),
-    outletId: uuid('outlet_id').references(() => outlets.id).notNull(),
+export const employees = mysqlTable('employees', {
+    id: varchar('id', { length: 36 }).primaryKey().$defaultFn(() => crypto.randomUUID()),
+    outletId: varchar('outlet_id', { length: 36 }).notNull(),
     name: varchar('name', { length: 100 }).notNull(),
     email: varchar('email', { length: 255 }),
     pinCode: varchar('pin_code', { length: 6 }),
@@ -75,18 +75,18 @@ export const employeesRelations = relations(employees, ({ one }) => ({
 // CATEGORIES & BRANDS
 // ===============================
 
-export const categories = pgTable('categories', {
-    id: uuid('id').primaryKey().defaultRandom(),
-    outletId: uuid('outlet_id').references(() => outlets.id).notNull(),
+export const categories = mysqlTable('categories', {
+    id: varchar('id', { length: 36 }).primaryKey().$defaultFn(() => crypto.randomUUID()),
+    outletId: varchar('outlet_id', { length: 36 }).notNull(),
     name: varchar('name', { length: 100 }).notNull(),
-    parentId: uuid('parent_id'),
-    sortOrder: integer('sort_order').default(0),
+    parentId: varchar('parent_id', { length: 36 }),
+    sortOrder: int('sort_order').default(0),
     createdAt: timestamp('created_at').defaultNow(),
 });
 
-export const brands = pgTable('brands', {
-    id: uuid('id').primaryKey().defaultRandom(),
-    outletId: uuid('outlet_id').references(() => outlets.id).notNull(),
+export const brands = mysqlTable('brands', {
+    id: varchar('id', { length: 36 }).primaryKey().$defaultFn(() => crypto.randomUUID()),
+    outletId: varchar('outlet_id', { length: 36 }).notNull(),
     name: varchar('name', { length: 100 }).notNull(),
     logoUrl: varchar('logo_url', { length: 500 }),
     createdAt: timestamp('created_at').defaultNow(),
@@ -96,9 +96,9 @@ export const brands = pgTable('brands', {
 // SUPPLIERS
 // ===============================
 
-export const suppliers = pgTable('suppliers', {
-    id: uuid('id').primaryKey().defaultRandom(),
-    outletId: uuid('outlet_id').references(() => outlets.id).notNull(),
+export const suppliers = mysqlTable('suppliers', {
+    id: varchar('id', { length: 36 }).primaryKey().$defaultFn(() => crypto.randomUUID()),
+    outletId: varchar('outlet_id', { length: 36 }).notNull(),
     name: varchar('name', { length: 100 }).notNull(),
     contact: varchar('contact', { length: 100 }),
     phone: varchar('phone', { length: 20 }),

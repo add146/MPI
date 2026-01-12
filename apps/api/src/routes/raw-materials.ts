@@ -65,12 +65,20 @@ rawMaterialsRoutes.post('/', async (c) => {
         const body = await c.req.json();
         const data = createRawMaterialSchema.parse(body);
 
-        const [material] = await db.insert(rawMaterials).values({
+        const materialId = crypto.randomUUID();
+
+        await db.insert(rawMaterials).values({
+            id: materialId,
             ...data,
             purchasePrice: data.purchasePrice.toString(),
             stockQty: data.stockQty?.toString() || '0',
             minStock: data.minStock?.toString() || '0',
-        }).returning();
+        });
+
+        const material = await db.query.rawMaterials.findFirst({
+            where: eq(rawMaterials.id, materialId),
+            with: { supplier: true },
+        });
 
         return c.json(material, 201);
     } catch (error) {
@@ -86,7 +94,15 @@ rawMaterialsRoutes.put('/:id', async (c) => {
     const id = c.req.param('id');
     const body = await c.req.json();
 
-    const [updated] = await db.update(rawMaterials)
+    const existing = await db.query.rawMaterials.findFirst({
+        where: eq(rawMaterials.id, id),
+    });
+
+    if (!existing) {
+        return c.json({ error: 'Raw material not found' }, 404);
+    }
+
+    await db.update(rawMaterials)
         .set({
             ...body,
             purchasePrice: body.purchasePrice?.toString(),
@@ -94,12 +110,12 @@ rawMaterialsRoutes.put('/:id', async (c) => {
             minStock: body.minStock?.toString(),
             updatedAt: new Date(),
         })
-        .where(eq(rawMaterials.id, id))
-        .returning();
+        .where(eq(rawMaterials.id, id));
 
-    if (!updated) {
-        return c.json({ error: 'Raw material not found' }, 404);
-    }
+    const updated = await db.query.rawMaterials.findFirst({
+        where: eq(rawMaterials.id, id),
+        with: { supplier: true },
+    });
 
     return c.json(updated);
 });
@@ -108,13 +124,15 @@ rawMaterialsRoutes.put('/:id', async (c) => {
 rawMaterialsRoutes.delete('/:id', async (c) => {
     const id = c.req.param('id');
 
-    const [deleted] = await db.delete(rawMaterials)
-        .where(eq(rawMaterials.id, id))
-        .returning();
+    const existing = await db.query.rawMaterials.findFirst({
+        where: eq(rawMaterials.id, id),
+    });
 
-    if (!deleted) {
+    if (!existing) {
         return c.json({ error: 'Raw material not found' }, 404);
     }
+
+    await db.delete(rawMaterials).where(eq(rawMaterials.id, id));
 
     return c.json({ success: true });
 });

@@ -92,20 +92,41 @@ authRoutes.post('/register', async (c) => {
         // Hash password
         const passwordHash = await bcrypt.hash(password, 10);
 
+        // Create user ID manually for MySQL
+        const userId = crypto.randomUUID();
+
         // Create user
-        const [newUser] = await db.insert(users).values({
+        await db.insert(users).values({
+            id: userId,
             email,
             passwordHash,
             name,
             phone,
             role: 'owner',
-        }).returning();
+        });
 
-        // Create default outlet
-        const [newOutlet] = await db.insert(outlets).values({
+        // Fetch the created user
+        const newUser = await db.query.users.findFirst({
+            where: eq(users.id, userId),
+        });
+
+        if (!newUser) {
+            throw new Error('Failed to create user');
+        }
+
+        // Create default outlet with ID
+        const outletId = crypto.randomUUID();
+
+        await db.insert(outlets).values({
+            id: outletId,
             ownerId: newUser.id,
             name: outletName,
-        }).returning();
+        });
+
+        // Fetch the created outlet
+        const newOutlet = await db.query.outlets.findFirst({
+            where: eq(outlets.id, outletId),
+        });
 
         // Create default price levels
         const defaultLevels = [
@@ -117,7 +138,8 @@ authRoutes.post('/register', async (c) => {
 
         await db.insert(priceLevels).values(
             defaultLevels.map((level) => ({
-                outletId: newOutlet.id,
+                id: crypto.randomUUID(),
+                outletId: outletId,
                 ...level,
             }))
         );

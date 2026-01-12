@@ -1,7 +1,7 @@
 import { Hono } from 'hono';
 import { z } from 'zod';
 import { db, products, recipes, rawMaterials, productPrices, priceLevels } from '@mpi/db';
-import { eq, and, sql } from 'drizzle-orm';
+import { eq, and } from 'drizzle-orm';
 
 export const productsRoutes = new Hono();
 
@@ -79,11 +79,14 @@ productsRoutes.post('/', async (c) => {
         const body = await c.req.json();
         const data = createProductSchema.parse(body);
 
-        const [product] = await db.insert(products).values({
+        const productId = crypto.randomUUID();
+
+        await db.insert(products).values({
+            id: productId,
             ...data,
             basePrice: data.basePrice.toString(),
             stockQty: data.stockQty?.toString() || '0',
-        }).returning();
+        });
 
         // Create default prices for all levels
         const levels = await db.query.priceLevels.findMany({
@@ -94,13 +97,19 @@ productsRoutes.post('/', async (c) => {
         if (levels.length > 0) {
             await db.insert(productPrices).values(
                 levels.map((level, index) => ({
-                    productId: product.id,
+                    id: crypto.randomUUID(),
+                    productId: productId,
                     levelId: level.id,
                     // Apply decreasing prices for higher levels
                     price: (data.basePrice * (1 - (index * 0.1))).toFixed(2),
                 }))
             );
         }
+
+        const product = await db.query.products.findFirst({
+            where: eq(products.id, productId),
+            with: { category: true, brand: true, prices: { with: { level: true } } },
+        });
 
         return c.json(product, 201);
     } catch (error) {
@@ -117,19 +126,27 @@ productsRoutes.put('/:id', async (c) => {
         const id = c.req.param('id');
         const body = await c.req.json();
 
-        const [updated] = await db.update(products)
+        const existing = await db.query.products.findFirst({
+            where: eq(products.id, id),
+        });
+
+        if (!existing) {
+            return c.json({ error: 'Product not found' }, 404);
+        }
+
+        await db.update(products)
             .set({
                 ...body,
                 basePrice: body.basePrice?.toString(),
                 stockQty: body.stockQty?.toString(),
                 updatedAt: new Date(),
             })
-            .where(eq(products.id, id))
-            .returning();
+            .where(eq(products.id, id));
 
-        if (!updated) {
-            return c.json({ error: 'Product not found' }, 404);
-        }
+        const updated = await db.query.products.findFirst({
+            where: eq(products.id, id),
+            with: { category: true, brand: true },
+        });
 
         return c.json(updated);
     } catch (error) {
@@ -141,13 +158,15 @@ productsRoutes.put('/:id', async (c) => {
 productsRoutes.delete('/:id', async (c) => {
     const id = c.req.param('id');
 
-    const [deleted] = await db.delete(products)
-        .where(eq(products.id, id))
-        .returning();
+    const existing = await db.query.products.findFirst({
+        where: eq(products.id, id),
+    });
 
-    if (!deleted) {
+    if (!existing) {
         return c.json({ error: 'Product not found' }, 404);
     }
+
+    await db.delete(products).where(eq(products.id, id));
 
     return c.json({ success: true });
 });

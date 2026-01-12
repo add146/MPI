@@ -138,8 +138,12 @@ transactionsRoutes.post('/', async (c) => {
         // Calculate change
         const changeAmount = data.paidAmount ? data.paidAmount - data.total : 0;
 
+        // Create transaction ID manually for MySQL
+        const transactionId = crypto.randomUUID();
+
         // Create transaction
-        const [transaction] = await db.insert(transactions).values({
+        await db.insert(transactions).values({
+            id: transactionId,
             outletId: data.outletId,
             employeeId: data.employeeId,
             customerId: data.customerId,
@@ -156,12 +160,13 @@ transactionsRoutes.post('/', async (c) => {
             paidAmount: data.paidAmount?.toString(),
             changeAmount: changeAmount.toString(),
             notes: data.notes,
-        }).returning();
+        });
 
         // Create transaction items
         await db.insert(transactionItems).values(
             data.items.map((item) => ({
-                transactionId: transaction.id,
+                id: crypto.randomUUID(),
+                transactionId: transactionId,
                 productId: item.productId,
                 bundleId: item.bundleId,
                 quantity: item.quantity.toString(),
@@ -232,8 +237,9 @@ transactionsRoutes.post('/', async (c) => {
 
                 // Add to points history
                 await db.insert(pointsHistory).values({
+                    id: crypto.randomUUID(),
                     customerId: data.customerId,
-                    transactionId: transaction.id,
+                    transactionId: transactionId,
                     pointsEarned,
                     balanceAfter: newPoints,
                     description: `Points from transaction ${orderNumber}`,
@@ -260,7 +266,7 @@ transactionsRoutes.post('/', async (c) => {
 
         // Return full transaction
         const result = await db.query.transactions.findFirst({
-            where: eq(transactions.id, transaction.id),
+            where: eq(transactions.id, transactionId),
             with: {
                 items: {
                     with: {

@@ -1,7 +1,7 @@
 import { Hono } from 'hono';
 import { z } from 'zod';
-import { db, customers, priceLevels, pointsHistory, pointsConfig } from '@mpi/db';
-import { eq, and, gte, sql } from 'drizzle-orm';
+import { db, customers, priceLevels, pointsHistory } from '@mpi/db';
+import { eq, and } from 'drizzle-orm';
 
 export const customersRoutes = new Hono();
 
@@ -90,10 +90,18 @@ customersRoutes.post('/', async (c) => {
             levelId = retailLevel?.id;
         }
 
-        const [customer] = await db.insert(customers).values({
+        const customerId = crypto.randomUUID();
+
+        await db.insert(customers).values({
+            id: customerId,
             ...data,
             levelId,
-        }).returning();
+        });
+
+        const customer = await db.query.customers.findFirst({
+            where: eq(customers.id, customerId),
+            with: { level: true },
+        });
 
         return c.json(customer, 201);
     } catch (error) {
@@ -109,17 +117,25 @@ customersRoutes.put('/:id', async (c) => {
     const id = c.req.param('id');
     const body = await c.req.json();
 
-    const [updated] = await db.update(customers)
+    const existing = await db.query.customers.findFirst({
+        where: eq(customers.id, id),
+    });
+
+    if (!existing) {
+        return c.json({ error: 'Customer not found' }, 404);
+    }
+
+    await db.update(customers)
         .set({
             ...body,
             updatedAt: new Date(),
         })
-        .where(eq(customers.id, id))
-        .returning();
+        .where(eq(customers.id, id));
 
-    if (!updated) {
-        return c.json({ error: 'Customer not found' }, 404);
-    }
+    const updated = await db.query.customers.findFirst({
+        where: eq(customers.id, id),
+        with: { level: true },
+    });
 
     return c.json(updated);
 });
@@ -128,13 +144,15 @@ customersRoutes.put('/:id', async (c) => {
 customersRoutes.delete('/:id', async (c) => {
     const id = c.req.param('id');
 
-    const [deleted] = await db.delete(customers)
-        .where(eq(customers.id, id))
-        .returning();
+    const existing = await db.query.customers.findFirst({
+        where: eq(customers.id, id),
+    });
 
-    if (!deleted) {
+    if (!existing) {
         return c.json({ error: 'Customer not found' }, 404);
     }
+
+    await db.delete(customers).where(eq(customers.id, id));
 
     return c.json({ success: true });
 });
@@ -174,6 +192,7 @@ customersRoutes.post('/:id/add-points', async (c) => {
 
     // Add to history
     await db.insert(pointsHistory).values({
+        id: crypto.randomUUID(),
         customerId: id,
         pointsEarned: points,
         balanceAfter: newBalance,

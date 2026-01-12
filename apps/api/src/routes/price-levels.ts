@@ -64,10 +64,17 @@ priceLevelsRoutes.post('/', async (c) => {
             return c.json({ error: 'Level order already exists for this outlet' }, 400);
         }
 
-        const [level] = await db.insert(priceLevels).values({
+        const levelId = crypto.randomUUID();
+
+        await db.insert(priceLevels).values({
+            id: levelId,
             ...data,
             discountPct: data.discountPct?.toString(),
-        }).returning();
+        });
+
+        const level = await db.query.priceLevels.findFirst({
+            where: eq(priceLevels.id, levelId),
+        });
 
         return c.json(level, 201);
     } catch (error) {
@@ -83,17 +90,24 @@ priceLevelsRoutes.put('/:id', async (c) => {
     const id = c.req.param('id');
     const body = await c.req.json();
 
-    const [updated] = await db.update(priceLevels)
+    const existing = await db.query.priceLevels.findFirst({
+        where: eq(priceLevels.id, id),
+    });
+
+    if (!existing) {
+        return c.json({ error: 'Price level not found' }, 404);
+    }
+
+    await db.update(priceLevels)
         .set({
             ...body,
             discountPct: body.discountPct?.toString(),
         })
-        .where(eq(priceLevels.id, id))
-        .returning();
+        .where(eq(priceLevels.id, id));
 
-    if (!updated) {
-        return c.json({ error: 'Price level not found' }, 404);
-    }
+    const updated = await db.query.priceLevels.findFirst({
+        where: eq(priceLevels.id, id),
+    });
 
     return c.json(updated);
 });
@@ -102,13 +116,15 @@ priceLevelsRoutes.put('/:id', async (c) => {
 priceLevelsRoutes.delete('/:id', async (c) => {
     const id = c.req.param('id');
 
-    const [deleted] = await db.delete(priceLevels)
-        .where(eq(priceLevels.id, id))
-        .returning();
+    const existing = await db.query.priceLevels.findFirst({
+        where: eq(priceLevels.id, id),
+    });
 
-    if (!deleted) {
+    if (!existing) {
         return c.json({ error: 'Price level not found' }, 404);
     }
+
+    await db.delete(priceLevels).where(eq(priceLevels.id, id));
 
     return c.json({ success: true });
 });

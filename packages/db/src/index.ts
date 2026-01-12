@@ -1,13 +1,13 @@
-import { drizzle } from 'drizzle-orm/postgres-js';
-import postgres from 'postgres';
+import { drizzle } from 'drizzle-orm/mysql2';
+import mysql from 'mysql2/promise';
 import * as schema from './schema';
 
-// Create connection
+// Create connection pool
 const connectionString = process.env.DATABASE_URL!;
-const client = postgres(connectionString);
+const pool = mysql.createPool(connectionString);
 
 // Create database instance
-export const db = drizzle(client, { schema });
+export const db = drizzle(pool, { schema, mode: 'default' });
 
 // Export schema
 export * from './schema';

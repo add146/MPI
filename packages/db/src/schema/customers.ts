@@ -1,4 +1,4 @@
-import { pgTable, uuid, varchar, text, timestamp, integer, decimal, boolean } from 'drizzle-orm/pg-core';
+import { mysqlTable, varchar, text, timestamp, int, decimal, boolean } from 'drizzle-orm/mysql-core';
 import { relations } from 'drizzle-orm';
 import { outlets } from './core';
 import { priceLevels } from './catalog';
@@ -7,15 +7,15 @@ import { priceLevels } from './catalog';
 // CUSTOMERS
 // ===============================
 
-export const customers = pgTable('customers', {
-    id: uuid('id').primaryKey().defaultRandom(),
-    outletId: uuid('outlet_id').references(() => outlets.id).notNull(),
+export const customers = mysqlTable('customers', {
+    id: varchar('id', { length: 36 }).primaryKey().$defaultFn(() => crypto.randomUUID()),
+    outletId: varchar('outlet_id', { length: 36 }).notNull(),
     name: varchar('name', { length: 100 }).notNull(),
     phone: varchar('phone', { length: 20 }),
     email: varchar('email', { length: 255 }),
     address: text('address'),
-    levelId: uuid('level_id').references(() => priceLevels.id),
-    totalPoints: integer('total_points').default(0),
+    levelId: varchar('level_id', { length: 36 }),
+    totalPoints: int('total_points').default(0),
     lifetimeSpent: decimal('lifetime_spent', { precision: 15, scale: 2 }).default('0'),
     createdAt: timestamp('created_at').defaultNow(),
     updatedAt: timestamp('updated_at').defaultNow(),
@@ -31,9 +31,9 @@ export const customersRelations = relations(customers, ({ one, many }) => ({
 // POINTS CONFIGURATION
 // ===============================
 
-export const pointsConfig = pgTable('points_config', {
-    id: uuid('id').primaryKey().defaultRandom(),
-    outletId: uuid('outlet_id').references(() => outlets.id).unique().notNull(),
+export const pointsConfig = mysqlTable('points_config', {
+    id: varchar('id', { length: 36 }).primaryKey().$defaultFn(() => crypto.randomUUID()),
+    outletId: varchar('outlet_id', { length: 36 }).unique().notNull(),
     pointsPerAmount: decimal('points_per_amount', { precision: 10, scale: 2 }).default('10000'),
     isActive: boolean('is_active').default(true),
     createdAt: timestamp('created_at').defaultNow(),
@@ -43,13 +43,13 @@ export const pointsConfig = pgTable('points_config', {
 // POINTS HISTORY
 // ===============================
 
-export const pointsHistory = pgTable('points_history', {
-    id: uuid('id').primaryKey().defaultRandom(),
-    customerId: uuid('customer_id').references(() => customers.id).notNull(),
-    transactionId: uuid('transaction_id'), // No FK reference to avoid circular dep
-    pointsEarned: integer('points_earned').default(0),
-    pointsRedeemed: integer('points_redeemed').default(0),
-    balanceAfter: integer('balance_after').default(0),
+export const pointsHistory = mysqlTable('points_history', {
+    id: varchar('id', { length: 36 }).primaryKey().$defaultFn(() => crypto.randomUUID()),
+    customerId: varchar('customer_id', { length: 36 }).notNull(),
+    transactionId: varchar('transaction_id', { length: 36 }),
+    pointsEarned: int('points_earned').default(0),
+    pointsRedeemed: int('points_redeemed').default(0),
+    balanceAfter: int('balance_after').default(0),
     description: text('description'),
     createdAt: timestamp('created_at').defaultNow(),
 });
