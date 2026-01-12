@@ -61,7 +61,6 @@ transactionsRoutes.get('/', async (c) => {
     const result = await db.query.transactions.findMany({
         where: whereClause,
         with: {
-            customer: true,
             employee: true,
             appliedLevel: true,
             items: {
@@ -85,7 +84,6 @@ transactionsRoutes.get('/:id', async (c) => {
     const transaction = await db.query.transactions.findFirst({
         where: eq(transactions.id, id),
         with: {
-            customer: true,
             employee: true,
             appliedLevel: true,
             paymentMethod: true,
@@ -264,7 +262,6 @@ transactionsRoutes.post('/', async (c) => {
         const result = await db.query.transactions.findFirst({
             where: eq(transactions.id, transaction.id),
             with: {
-                customer: true,
                 items: {
                     with: {
                         product: true,
