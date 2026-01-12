@@ -32,21 +32,21 @@ pnpm install
 ```bash
 # Buat file .env di packages/db
 cat > packages/db/.env << 'EOF'
-DATABASE_URL=postgres://mpi_user:YOUR_PASSWORD@localhost:5432/mpi_db
+DATABASE_URL=mysql://mpi_user:Bismillah123@localhost:3306/mpi_db
 EOF
 
 # Buat file .env di apps/api  
 cat > apps/api/.env << 'EOF'
 PORT=3005
-JWT_SECRET=your_super_secret_jwt_key_here
-DATABASE_URL=postgres://mpi_user:YOUR_PASSWORD@localhost:5432/mpi_db
+JWT_SECRET=mpi_secret_key_2024_random_string
+DATABASE_URL=mysql://mpi_user:Bismillah123@localhost:3306/mpi_db
 EOF
 ```
 
-### 4. Setup Database
+### 4. Setup Database di aaPanel
 ```bash
-# Generate schema dan push ke database
-pnpm db:push
+# Database sudah dibuat via aaPanel
+# Pastikan user mpi_user punya akses ke database mpi_db
 ```
 
 ### 5. Build Aplikasi
